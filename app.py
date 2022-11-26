@@ -31,6 +31,10 @@ db = SQL("sqlite:///wts.db")
 API_KEY = os.environ.get("API_KEY")
 if not API_KEY:
     raise RuntimeError("API_KEY not set")
+else:
+    print(f"**************************")
+    print(f"THE API_KEY IS: {API_KEY}")
+    print(f"**************************")
 
 
 @app.after_request
@@ -45,17 +49,22 @@ def after_request(response):
 @app.route("/")
 def index():
 
+    print(f"RENDERING HELLO.HTML: {API_KEY}")
+    
     return render_template("hello.html", API_KEY=API_KEY)
 
 
 @app.route("/play")
 def play():
     
+    print(f"************* BEFORE SpotifyOAuth *************")
+    
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="9dcdc500adbd4425b3c37fdcc0945bd8",
                                                 client_secret="7d299bf748e64bcfb8191cae79c36164",
                                                 redirect_uri="http://127.0.0.1:9899",
                                                 scope="user-library-read"))
 
+    print(f"************* GET CURRENT USER *************")
     # CURRENT USER
     user = sp.current_user()
     print(user)
