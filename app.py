@@ -61,31 +61,41 @@ def after_request(response):
 @app.route("/")
 def index():
 
-    print(f"RENDERING HELLO.HTML: {API_KEY}")
-    
-    return render_template("hello.html", API_KEY=API_KEY)
 
+    cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
+    auth_manager = spotipy.oauth2.SpotifyOAuth(scope='user-read-currently-playing playlist-modify-private user-library-read user-read-email user-read-private',
+                                               cache_handler=cache_handler,
+                                               show_dialog=True)
 
-@app.route("/play")
-def play():
-    
-    print(f"************* BEFORE SpotifyOAuth *************")
-    
-    # sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="9dcdc500adbd4425b3c37fdcc0945bd8",
-    #                                             client_secret="7d299bf748e64bcfb8191cae79c36164",
-    #                                             redirect_uri="http://127.0.0.1:9899",
-    #                                             scope="user-library-read"))
+    if request.args.get("code"):
+        # Step 2. Being redirected from Spotify auth page
+        print(f"************* STEP 2 SpotifyOAuth *************")
+        auth_manager.get_access_token(request.args.get("code"))
+        return redirect('/')
 
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope="user-library-read"))
+    if not auth_manager.validate_token(cache_handler.get_cached_token()):
+        # Step 1. Display sign in link when no token
+        print(f"************* STEP 1 SpotifyOAuth *************")
+        auth_url = auth_manager.get_authorize_url()
+        return f'<h2><a href="{auth_url}">Sign in</a></h2>'
+
+    # Step 3. Signed in, display data
+    print(f"************* STEP 3 SpotifyOAuth SIGNED IN *************")
+    spotify = spotipy.Spotify(auth_manager=auth_manager)
+    # return f'<h2>Hi {spotify.me()["display_name"]}, ' \
+    #        f'<small><a href="/sign_out">[sign out]<a/></small></h2>' \
+    #        f'<a href="/playlists">my playlists</a> | ' \
+    #        f'<a href="/currently_playing">currently playing</a> | ' \
+    #     f'<a href="/current_user">me</a>' \
 
     print(f"************* GET CURRENT USER *************")
     # CURRENT USER
-    user = sp.current_user()
+    user = spotify.current_user()
     print(user)
     
     # LIKED SONGS list
     tracks = []
-    results = sp.current_user_saved_tracks()
+    results = spotify.current_user_saved_tracks()
 
     for idx, item in enumerate(results['items']):
         track = item['track']
@@ -95,36 +105,43 @@ def play():
     return render_template("game.html", tracks=tracks, user=user)
 
 
-# @app.route("/login", methods=["GET", "POST"])
-# def login():
-#     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id="9dcdc500adbd4425b3c37fdcc0945bd8",
-#                                                 client_secret="7d299bf748e64bcfb8191cae79c36164",
-#                                                 redirect_uri="http://localhost:8888",
-#                                                 scope="user-library-read"))
 
-#     # USER
-#     # user = sp.user('plamere')
-#     user = sp.current_user()
-#     print(user)
-    
-#     # LIKED SONGS list
-#     tracks = []
-#     results = sp.current_user_saved_tracks()
-
-#     for idx, item in enumerate(results['items']):
-#         track = item['track']
-#         tracks.append(f"{idx} {track['artists'][0]['name']} - {track['name']}")
-#         print(idx, track['artists'][0]['name'], " – ", track['name'])
-
-#     return render_template("login.html", tracks=tracks, user=user)
+@app.route('/sign_out')
+def sign_out():
+    session.pop("token_info", None)
+    return redirect('/')
 
 
-@app.route("/logout")
-def logout():
-    """Log user out"""
+@app.route('/playlists')
+def playlists():
+    cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
+    auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler)
+    if not auth_manager.validate_token(cache_handler.get_cached_token()):
+        return redirect('/')
 
-    # Forget any user_id
-    session.clear()
+    spotify = spotipy.Spotify(auth_manager=auth_manager)
+    return spotify.current_user_playlists()
 
-    # Redirect user to login form
-    return redirect("/")
+
+@app.route('/currently_playing')
+def currently_playing():
+    cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
+    auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler)
+    if not auth_manager.validate_token(cache_handler.get_cached_token()):
+        return redirect('/')
+    spotify = spotipy.Spotify(auth_manager=auth_manager)
+    track = spotify.current_user_playing_track()
+    if not track is None:
+        return track
+    return "No track currently playing."
+
+
+@app.route('/current_user')
+def current_user():
+    cache_handler = spotipy.cache_handler.FlaskSessionCacheHandler(session)
+    auth_manager = spotipy.oauth2.SpotifyOAuth(cache_handler=cache_handler)
+    if not auth_manager.validate_token(cache_handler.get_cached_token()):
+        return redirect('/')
+    spotify = spotipy.Spotify(auth_manager=auth_manager)
+    return spotify.current_user()
+
