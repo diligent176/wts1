@@ -28,8 +28,9 @@ Session(app)
 db = SQL("sqlite:///wts.db")
 
 # Make sure API key is set
-# if not os.environ.get("API_KEY"):
-#     raise RuntimeError("API_KEY not set")
+API_KEY = os.environ.get("API_KEY")
+if not API_KEY:
+    raise RuntimeError("API_KEY not set")
 
 
 @app.after_request
@@ -44,7 +45,7 @@ def after_request(response):
 @app.route("/")
 def index():
 
-    return render_template("hello.html")
+    return render_template("hello.html", API_KEY=API_KEY)
 
 
 @app.route("/play")
