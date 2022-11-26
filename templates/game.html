@@ -5,7 +5,11 @@ LIKED SONGS
 {% endblock %}
 
 {% block main %}
-<h1>{{ user['display_name'] }}</h1>
+<h1>Welcome, {{ user['display_name'] }} from {{ user['country'] }}</h1>
+
+<h4>{{ user['email'] }}</h4>
+
+<br />
 
 <h3>LIKED SONGS</h3>
 <ul>
