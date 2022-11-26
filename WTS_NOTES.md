@@ -1,7 +1,14 @@
+# LOCAL TESTING
+
+http://127.0.0.1:9899/
+
+
 
 ## Azure WTS1 resource group
 
 https://wts1.azurewebsites.net
+
+
 
 
 

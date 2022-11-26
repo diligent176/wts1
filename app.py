@@ -77,7 +77,8 @@ def index():
         # Step 1. Display sign in link when no token
         print(f"************* STEP 1 SpotifyOAuth *************")
         auth_url = auth_manager.get_authorize_url()
-        return f'<h2><a href="{auth_url}">Sign in</a></h2>'
+        # return f'<h2><a href="{auth_url}">Sign in</a></h2>'
+        return render_template("login.html", auth_url=auth_url)
 
     # Step 3. Signed in, display data
     print(f"************* STEP 3 SpotifyOAuth SIGNED IN *************")
