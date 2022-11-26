@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+LIKED SONGS
+{% endblock %}
+
+{% block main %}
+<h1>{{ user['display_name'] }}</h1>
+
+<h3>LIKED SONGS</h3>
+<ul>
+    {% for t in tracks %}
+    <li>{{ t }}</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
