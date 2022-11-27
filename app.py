@@ -7,6 +7,7 @@ from flask import (
     request,
     session,
     url_for,
+    send_from_directory
 )
 from flask_session import Session
 import json
@@ -188,8 +189,9 @@ def me():
 
     # Check tokens
     if 'tokens' not in session:
-        app.logger.error('No tokens in session.')
-        abort(400)
+        return redirect('/')
+        # app.logger.error('No tokens in session.')
+        # abort(400)
 
     # Get profile info
     headers = {'Authorization': f"Bearer {session['tokens'].get('access_token')}"}
@@ -204,3 +206,9 @@ def me():
         abort(response.status_code)
 
     return render_template('me.html', data=response_data, tokens=session.get('tokens'))
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
