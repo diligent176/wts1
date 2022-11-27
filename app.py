@@ -40,9 +40,8 @@ app = Flask(__name__)
 # why app.secret_key?
 app.secret_key = os.urandom(16)
 
-
-# Ensure templates are auto-reloaded
-# app.config["TEMPLATES_AUTO_RELOAD"] = True
+# ensure templates auto-reload
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 # Custom filter
 # app.jinja_env.filters["usd"] = usd
@@ -52,11 +51,8 @@ app.secret_key = os.urandom(16)
 # app.config["SESSION_TYPE"] = "filesystem"
 # Session(app)
 
-
 # Configure CS50 Library to use SQLite database
 # db = SQL("sqlite:///wts.db")
-
-
 
 # check if API_KEY and WTS VARS are set
 if not API_KEY:
@@ -76,14 +72,13 @@ else:
     print(f"********* END ENVIRONMENT ************")
 
 
-# @app.after_request
-# def after_request(response):
-#     # to disable browser caching
-#     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-#     response.headers["Expires"] = 0
-#     response.headers["Pragma"] = "no-cache"
-#     return response
-
+@app.after_request
+def after_request(response):
+    # to disable browser caching
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Expires"] = 0
+    response.headers["Pragma"] = "no-cache"
+    return response
 
 
 @app.route('/')
@@ -92,43 +87,31 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/<loginout>')
-def login(loginout):
-    '''Login or logout user.
+@app.route('/logout')
+def sign_out():
+    # delete sessions tokens and return to home
+    # TO DO: flash a message?
+    session.pop("tokens", None)
+    return redirect('/')
 
-    Note:
-        Login and logout process are essentially the same. Logout forces
-        re-login to appear, even if their token hasn't expired.
-    '''
 
-    # redirect_uri can be guessed, so let's generate
-    # a random `state` string to prevent csrf forgery.
-    state = ''.join(
-        secrets.choice(string.ascii_uppercase + string.digits) for _ in range(16)
-    )
+@app.route('/login')
+def login():
 
-    # Request authorization from user
+    # because redirect_uri could be guessed
+    # generate random state to prevent CSRF
+    state = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(16))
+
+    # Request user to authorize these scopes
     scope = 'user-read-private user-read-email'
 
-    if loginout == 'logout':
-        payload = {
-            'client_id': CLIENT_ID,
-            'response_type': 'code',
-            'redirect_uri': REDIRECT_URI,
-            'state': state,
-            'scope': scope,
-            'show_dialog': True,
-        }
-    elif loginout == 'login':
-        payload = {
-            'client_id': CLIENT_ID,
-            'response_type': 'code',
-            'redirect_uri': REDIRECT_URI,
-            'state': state,
-            'scope': scope,
-        }
-    else:
-        abort(404)
+    payload = {
+        'client_id': CLIENT_ID,
+        'response_type': 'code',
+        'redirect_uri': REDIRECT_URI,
+        'state': state,
+        'scope': scope,
+    }
 
     res = make_response(redirect(f'{AUTH_URL}/?{urlencode(payload)}'))
     res.set_cookie('spotify_auth_state', state)

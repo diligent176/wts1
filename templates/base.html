@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     {% block head %}
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -9,14 +10,19 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    <title>{% block title %}{% endblock %}</title>
+    <title>Whats That Song: {% block title %}{% endblock %}</title>
     {% endblock %}
-  </head>
-  <body>
+</head>
+
+<body>
     <div class="container">
-      <h1 class="mt-3 mb-3">{% block header %}{% endblock %}</h1>
-      <div id="content">{% block content %}{% endblock %}</div>
-      <div id="footer" class="text-center">{% block footer %}{% endblock %}</div>
-  </div>
-  </body>
+        <h1 class="mt-5 mb-5 pt-3">{% block header %}{% endblock %}</h1>
+        <div id="content">{% block content %}{% endblock %}</div>
+        <div id="footer" class="text-center">
+            <p>{% block footer %}{% endblock %}</p>
+            <p>a game by <a href="https://seagoat.dev/">SeaGoat Software</a></p>
+        </div>
+    </div>
+</body>
+
 </html>
