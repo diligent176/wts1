@@ -17,3 +17,13 @@
 - https://www.w3schools.com/bootstrap/default.asp
 - https://www.w3schools.com/bootstrap/bootstrap_ref_all_classes.asp
 - https://www.w3schools.com/bootstrap/bootstrap_ref_css_text.asp
+
+
+
+#### VS Code Environment Variables
+- https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file
+
+WTS_CLIENT_ID = redacted
+WTS_CLIENT_SECRET = redacted
+WTS_REDIRECT_URI = http://127.0.0.1:5000/callback
+

@@ -10,14 +10,15 @@ from flask import (
     send_from_directory
 )
 from flask_session import Session
+from urllib.parse import urlencode
+from cs50 import SQL
 import json
 import logging
 import os
 import requests
 import secrets
 import string
-from urllib.parse import urlencode
-from cs50 import SQL
+import spotify
 
 
 logging.basicConfig(
@@ -33,7 +34,7 @@ REDIRECT_URI = os.environ.get("WTS_REDIRECT_URI")
 # Spotify API endpoints
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
-ME_URL = 'https://api.spotify.com/v1/me'
+# ME_URL = 'https://api.spotify.com/v1/me'
 
 
 # Configure app
@@ -105,7 +106,8 @@ def login():
     state = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(16))
 
     # Request user to authorize these scopes
-    scope = 'user-read-private user-read-email'
+    scope = 'user-read-private user-read-email user-library-read'
+    # scope = 'user-read-private user-read-email'     # TO DO: test errors cases with insufficient scopes
 
     payload = {
         'client_id': CLIENT_ID,
@@ -189,23 +191,18 @@ def me():
 
     # Check tokens
     if 'tokens' not in session:
+        app.logger.info('No tokens in session. Redirect user to login.')
         return redirect('/')
-        # app.logger.error('No tokens in session.')
-        # abort(400)
 
-    # Get profile info
-    headers = {'Authorization': f"Bearer {session['tokens'].get('access_token')}"}
-    response = requests.get(ME_URL, headers=headers)
-    response_data = response.json()
+    me = spotify.get_me()
+    tracks = spotify.get_liked_songs()
+    
+    return render_template('me.html', data=me, tokens=session.get('tokens'), tracks=tracks)
 
-    if response.status_code != 200:
-        app.logger.error(
-            'Failed to get profile info: %s',
-            response_data.get('error', 'No error message returned.'),
-        )
-        abort(response.status_code)
 
-    return render_template('me.html', data=response_data, tokens=session.get('tokens'))
+@app.route('/liked')
+def liked():
+    ...
 
 
 @app.route('/favicon.ico')
