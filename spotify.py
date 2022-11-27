@@ -10,6 +10,9 @@ import requests
 ME_URL = "https://api.spotify.com/v1/me"
 LIKED_URL = "https://api.spotify.com/v1/me/tracks"
 PLAYLISTS_URL = "https://api.spotify.com/v1/me/playlists"
+PLAYLISTITEMS_URL = "https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
+# e.g. get tracks at https://api.spotify.com/v1/playlists/27hR4eUcVxpfZzZT7hKd4A/tracks
+
 
 def get_me():
     """ Current user's Spotify profile
@@ -48,8 +51,8 @@ def get_liked_songs():
 
     for idx, item in enumerate(response_data["items"]):
         track = item["track"]
-        tracks.append(f"{idx + 1} - {track['artists'][0]['name']} - {track['name']}")
-        print(f"{idx} - {track['artists'][0]['name']} – {track['name']}")
+        tracks.append(f"{(idx+1):02d} - {track['name']} ({track['artists'][0]['name']})")
+        # print(f"{(idx+1):02d} - {track['name']} ({track['artists'][0]['name']})")
 
     return tracks
 
@@ -71,9 +74,8 @@ def get_playlists():
         # TO DO: handle 403 and other errors gracefully
         abort(response.status_code)
 
-    for idx, item in enumerate(response_data["items"]):
-        # tracks = item["tracks"]
-        # playlists.append(f"{idx} {track['artists'][0]['name']} - {track['name']}")
+    # for idx, item in enumerate(response_data["items"]):
+    for item in response_data["items"]:
         playlists.append(
             {
                 "name": item["name"],
@@ -85,9 +87,10 @@ def get_playlists():
                 "image0": item.get("images")[0].get("url"),
             }
         )
-        print(f"{idx} {item}")
+        # print(f"{idx} {item}")
+        sorted_playlists = sorted(playlists, key=lambda d: d['tracks_count'], reverse=True)
 
-    return playlists
+    return sorted_playlists
 
 
 def get_playlist_tracks():

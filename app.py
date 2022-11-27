@@ -193,7 +193,8 @@ def me():
     me = spotify.get_me()
     tracks = spotify.get_liked_songs()
     playlists = spotify.get_playlists()
-    print(playlists)
+    # sorted_playlists = sorted(playlists, key=lambda d: d['tracks_count'], reverse=True)
+    # print(playlists)
     
     return render_template('me.html', data=me, tokens=session.get('tokens'), tracks=tracks, playlists=playlists)
 
