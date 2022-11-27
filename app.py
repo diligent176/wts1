@@ -26,7 +26,6 @@ logging.basicConfig(
 )
 
 # environmental constants
-API_KEY = os.environ.get("API_KEY")
 CLIENT_ID = os.environ.get("WTS_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("WTS_CLIENT_SECRET")
 REDIRECT_URI = os.environ.get("WTS_REDIRECT_URI")
@@ -34,15 +33,15 @@ REDIRECT_URI = os.environ.get("WTS_REDIRECT_URI")
 # Spotify API endpoints
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = 'https://accounts.spotify.com/api/token'
-# ME_URL = 'https://api.spotify.com/v1/me'
 
 
-# Configure app
+# set flask app
 app = Flask(__name__)
-# why app.secret_key?
+# TO DO: why app.secret_key for flask - signed cookie?
+# Session breaks without this...  <SecureCookieSession {}>
 app.secret_key = os.urandom(16)
 
-# ensure templates auto-reload
+# set flask templates auto-reload
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 # Custom filter
@@ -56,9 +55,7 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 # Configure CS50 Library to use SQLite database
 # db = SQL("sqlite:///wts.db")
 
-# check if API_KEY and WTS VARS are set
-if not API_KEY:
-    raise RuntimeError("API_KEY not set")
+# check ENVT VARS are set
 if not CLIENT_ID:
     raise RuntimeError("CLIENT_ID not set")
 if not CLIENT_SECRET:
@@ -67,7 +64,6 @@ if not REDIRECT_URI:
     raise RuntimeError("REDIRECT_URI not set")
 else:
     print(f"********* ENVIRONMENT ************")
-    print(f"API_KEY IS: {API_KEY}")
     print(f"CLIENT_ID IS: {CLIENT_ID}")
     print(f"CLIENT_SECRET IS: {CLIENT_SECRET}")
     print(f"REDIRECT_URI IS: {REDIRECT_URI}")
@@ -92,7 +88,7 @@ def index():
 
 @app.route('/logout')
 def sign_out():
-    # delete sessions tokens and return to home
+    # delete tokens from session and return home
     # TO DO: flash a message?
     session.pop("tokens", None)
     return redirect('/')
