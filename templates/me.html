@@ -8,55 +8,50 @@
 <div id="profile" class="align-content-center">
 
     <!-- PROFILE HEADER TABLE -->
-    <div class="text-left">
-        <table class="table">
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td class="align-bottom w-50">
+                <td class="align-bottom w-25 text-end">
                     <h1>Logged in as <i>{{ data.display_name }}</i></h1>
                 </td>
-                <td class="align-bottom w-50">
-                    &nbsp;
+                <td class="align-bottom w-75">
                     {% if data.images %}
-                    <div>
                         <img width="150" src="{{ data.images.0.url }}" />
-                    </div>
                     {% endif %}
+                    &nbsp;
                 </td>
             </tr>
-        </table>
-
-        <!-- PROFILE DETAIL TABLE -->
-        <table class="table table-striped">
-            <tbody>
-                <tr>
-                    <td>Spotify Id</td>
-                    <td>
-                        <a href="{{ data.external_urls.spotify }}">{{ data.external_urls.spotify }}</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Spotify URI</td>
-                    <td><a href="{{ data.uri }}">{{ data.uri }}</a></td>
-                </tr>
-                <tr>
-                    <td>Email</td>
-                    <td>{{ data.email }}</td>
-                </tr>
-                <tr>
-                    <td>Country</td>
-                    <td>{{ data.country }}</td>
-                </tr>
-                <tr>
-                    <td>Followers</td>
-                    <td>{{ data.followers.total }}</td>
-                </tr>
-                <tr>
-                    <td>Account Type</td>
-                    <td>{{ data.product }}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="text-end">Spotify Id</td>
+                <td>
+                    <a href="{{ data.external_urls.spotify }}">{{ data.external_urls.spotify }}</a>
+                </td>
+            </tr>
+            <tr>
+                <td class="text-end">Spotify URI</td>
+                <td><a href="{{ data.uri }}">{{ data.uri }}</a></td>
+            </tr>
+            <tr>
+                <td class="text-end">Email</td>
+                <td>{{ data.email }}</td>
+            </tr>
+            <tr>
+                <td class="text-end">Country</td>
+                <td>{{ data.country }}</td>
+            </tr>
+            <tr>
+                <td class="text-end">Followers</td>
+                <td>{{ data.followers.total }}</td>
+            </tr>
+            <tr>
+                <td class="text-end">Account Type</td>
+                <td>{{ data.product }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
 </div>
 
