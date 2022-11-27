@@ -1,5 +1,14 @@
+certifi
+chardet
+click
+colorama
 cs50
 Flask
 Flask-Session
+idna
+itsdangerous
+Jinja2
+MarkupSafe
 requests
-spotipy
+urllib3
+Werkzeug
