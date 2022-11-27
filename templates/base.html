@@ -10,6 +10,11 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
+    <!-- https://favicon.io/emoji-favicons/money-bag/ -->
+    <link href="/static/favicon.ico" rel="icon">
+    <link href="/static/styles.css" rel="stylesheet">
+
+
     <title>Whats That Song: {% block title %}{% endblock %}</title>
     {% endblock %}
 </head>
@@ -20,7 +25,7 @@
         <div id="content">{% block content %}{% endblock %}</div>
         <div id="footer" class="text-center">
             <p>{% block footer %}{% endblock %}</p>
-            <p>a game by <a href="https://seagoat.dev/">SeaGoat Software</a></p>
+            <p class="mt-5">a game from <a href="https://seagoat.dev/" target="_blank">SeaGoat Software</a></p>
         </div>
     </div>
 </body>

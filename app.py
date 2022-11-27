@@ -83,8 +83,9 @@ def after_request(response):
 
 @app.route('/')
 def index():
-
-    return render_template('index.html')
+    # Welcome and info page
+    # ask user to login to Spotify
+    return render_template('login.html')
 
 
 @app.route('/logout')
@@ -113,10 +114,10 @@ def login():
         'scope': scope,
     }
 
-    res = make_response(redirect(f'{AUTH_URL}/?{urlencode(payload)}'))
-    res.set_cookie('spotify_auth_state', state)
+    response = make_response(redirect(f'{AUTH_URL}/?{urlencode(payload)}'))
+    response.set_cookie('spotify_auth_state', state)
 
-    return res
+    return response
 
 
 @app.route('/callback')
@@ -139,23 +140,22 @@ def callback():
         'redirect_uri': REDIRECT_URI,
     }
 
-    # `auth=(CLIENT_ID, SECRET)` basically wraps an 'Authorization'
-    # header with value:
+    # auth=(CLIENT_ID, SECRET) wraps an 'Authorization' header with value:
     # b'Basic ' + b64encode((CLIENT_ID + ':' + SECRET).encode())
-    res = requests.post(TOKEN_URL, auth=(CLIENT_ID, CLIENT_SECRET), data=payload)
-    res_data = res.json()
+    response = requests.post(TOKEN_URL, auth=(CLIENT_ID, CLIENT_SECRET), data=payload)
+    response_data = response.json()
 
-    if res_data.get('error') or res.status_code != 200:
+    if response_data.get('error') or response.status_code != 200:
         app.logger.error(
             'Failed to receive token: %s',
-            res_data.get('error', 'No error information received.'),
+            response_data.get('error', 'No error information received.'),
         )
-        abort(res.status_code)
+        abort(response.status_code)
 
     # Load tokens into session
     session['tokens'] = {
-        'access_token': res_data.get('access_token'),
-        'refresh_token': res_data.get('refresh_token'),
+        'access_token': response_data.get('access_token'),
+        'refresh_token': response_data.get('refresh_token'),
     }
 
     return redirect(url_for('me'))
@@ -171,13 +171,13 @@ def refresh():
     }
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
-    res = requests.post(
+    response = requests.post(
         TOKEN_URL, auth=(CLIENT_ID, CLIENT_SECRET), data=payload, headers=headers
     )
-    res_data = res.json()
+    response_data = response.json()
 
     # Load new token into session
-    session['tokens']['access_token'] = res_data.get('access_token')
+    session['tokens']['access_token'] = response_data.get('access_token')
 
     return json.dumps(session['tokens'])
 
@@ -186,22 +186,21 @@ def refresh():
 def me():
     '''Get profile info as a API example.'''
 
-    # Check for tokens
+    # Check tokens
     if 'tokens' not in session:
         app.logger.error('No tokens in session.')
         abort(400)
 
     # Get profile info
     headers = {'Authorization': f"Bearer {session['tokens'].get('access_token')}"}
+    response = requests.get(ME_URL, headers=headers)
+    response_data = response.json()
 
-    res = requests.get(ME_URL, headers=headers)
-    res_data = res.json()
-
-    if res.status_code != 200:
+    if response.status_code != 200:
         app.logger.error(
             'Failed to get profile info: %s',
-            res_data.get('error', 'No error message returned.'),
+            response_data.get('error', 'No error message returned.'),
         )
-        abort(res.status_code)
+        abort(response.status_code)
 
-    return render_template('me.html', data=res_data, tokens=session.get('tokens'))
+    return render_template('me.html', data=response_data, tokens=session.get('tokens'))
