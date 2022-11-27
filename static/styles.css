@@ -3,6 +3,12 @@
     font-size: larger;
 }
 
+.spotgreen {
+    color: #000000;
+    background-color: #1ED760;
+    /* border-color: #000000; */
+    border: 0px solid black;
+}
 
 /* Size for brand */
 nav .navbar-brand {
