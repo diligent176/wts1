@@ -1,18 +1,25 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Login
-{% endblock %}
-
-{% block header %}
-    Whats That Song?
+Login
 {% endblock %}
 
 {% block content %}
+<div class="text-center ml-5 mr-5">
+    <h1 class="mt-5 mb-5 pt-3">
+        Whats That Song?
+    </h1>
 
-<h4 class="mt-5 mb-3">A Lyrics Trivia Game</h4>
-<p class="largetext mt-3 mb-1">Song lyrics from your favorite Spotify Songs &amp; Artists!</p>
-<p class="largetext mb-5">Try to beat high scores of other spotify users.</p>
+    <h4 class="mt-5 mb-3">
+        A Lyrics Trivia Game
+    </h4>
+    <p class="largetext mt-3 mb-1">
+        Song lyrics from your favorite Spotify Songs &amp; Artists!
+    </p>
+    <p class="largetext mb-5">
+        Try to beat high scores of other spotify users.
+    </p>
 
-<a href="/login" class="btn btn-primary spotgreen">Login with your Spotify</a>
+    <a href="/login" class="btn btn-primary spotgreen">Login with your Spotify</a>
+</div>
 {% endblock %}

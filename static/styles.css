@@ -10,6 +10,18 @@
     border: 0px solid black;
 }
 
+.outlinered {
+    border: 1px solid red;
+}
+
+.outlineblue {
+    border: 1px solid blue;
+}
+
+.outlinegreen {
+    border: 1px solid green;
+}
+
 /* Size for brand */
 nav .navbar-brand {
     font-size: xx-large;

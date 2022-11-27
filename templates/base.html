@@ -3,30 +3,33 @@
 
 <head>
     {% block head %}
-    <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="initial-scale=1, width=device-width">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
 
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-    <!-- https://favicon.io/emoji-favicons/money-bag/ -->
-    <link href="/static/favicon.ico" rel="icon">
     <link href="/static/styles.css" rel="stylesheet">
 
+    <!-- https://favicon.io/emoji-favicons/ -->
+    <link href="/static/favicon.ico" rel="icon">
 
     <title>Whats That Song: {% block title %}{% endblock %}</title>
     {% endblock %}
 </head>
 
 <body>
-    <div class="container">
-        <h1 class="mt-5 mb-5 pt-3">{% block header %}{% endblock %}</h1>
-        <div id="content">{% block content %}{% endblock %}</div>
+    <!-- <div class="container"> -->
+    <div class="container-fluid py-5 outlineblue">
+
+        <div id="content">
+            {% block content %}{% endblock %}
+        </div>
+
         <div id="footer" class="text-center">
             <p>{% block footer %}{% endblock %}</p>
             <p class="mt-5">a game from <a href="https://seagoat.dev/" target="_blank">SeaGoat Software</a></p>
         </div>
+
     </div>
 </body>
 
