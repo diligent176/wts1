@@ -27,3 +27,12 @@ WTS_CLIENT_ID = redacted
 WTS_CLIENT_SECRET = redacted
 WTS_REDIRECT_URI = http://127.0.0.1:5000/callback
 
+
+
+##### Spotify response objects
+
+Playlists 
+    > items 
+        > images
+        > tracks
+            > 

@@ -3,6 +3,10 @@
     font-size: larger;
 }
 
+ol.nonum {
+    list-style: none;
+}
+
 .spotgreen {
     color: #000000;
     background-color: #1ED760;

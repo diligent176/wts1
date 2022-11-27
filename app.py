@@ -183,7 +183,7 @@ def refresh():
 
 @app.route('/me')
 def me():
-    '''Get profile info as a API example.'''
+    """ Display current user information """
 
     # Check tokens
     if 'tokens' not in session:
@@ -192,8 +192,10 @@ def me():
 
     me = spotify.get_me()
     tracks = spotify.get_liked_songs()
+    playlists = spotify.get_playlists()
+    print(playlists)
     
-    return render_template('me.html', data=me, tokens=session.get('tokens'), tracks=tracks)
+    return render_template('me.html', data=me, tokens=session.get('tokens'), tracks=tracks, playlists=playlists)
 
 
 @app.route('/liked')

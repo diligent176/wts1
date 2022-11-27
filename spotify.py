@@ -23,7 +23,7 @@ def get_me():
 
     if response.status_code != 200:
         logging.error(
-            f"Failed in get_me() - HTTP {response.status_code} {response_data.get('error', 'No error message was returned.')}")
+            f"get_me() failed - HTTP {response.status_code} {response_data.get('error', 'No error message was returned.')}")
         # TO DO: handle 403 and other errors gracefully
         abort(response.status_code)
 
@@ -42,24 +42,59 @@ def get_liked_songs():
 
     if response.status_code != 200:
         logging.error(
-            f"Failed in get_liked_songs() - HTTP {response.status_code} {response_data.get('error', 'No error message was returned.')}")
+            f"get_liked_songs() failed - HTTP {response.status_code} {response_data.get('error', 'No error message was returned.')}")
         # TO DO: handle 403 and other errors gracefully
         abort(response.status_code)
 
     for idx, item in enumerate(response_data["items"]):
         track = item["track"]
-        tracks.append(f"{idx} {track['artists'][0]['name']} - {track['name']}")
-        print(f"{idx} {track['artists'][0]['name']} – {track['name']}")
+        tracks.append(f"{idx + 1} - {track['artists'][0]['name']} - {track['name']}")
+        print(f"{idx} - {track['artists'][0]['name']} – {track['name']}")
 
     return tracks
 
 
 def get_playlists():
     """Current user's Spotify Playlists
+    Note: does not return each Track, need to call get_playlist_tracks()
     https://developer.spotify.com/console/get-current-user-playlists/
     """
     playlists = []
     auth_header = get_auth_header()
+
+    response = requests.get(PLAYLISTS_URL, headers=auth_header)
+    response_data = response.json()
+
+    if response.status_code != 200:
+        logging.error(
+            f"get_playlists() failed - HTTP {response.status_code} {response_data.get('error', 'No error message was returned.')}")
+        # TO DO: handle 403 and other errors gracefully
+        abort(response.status_code)
+
+    for idx, item in enumerate(response_data["items"]):
+        # tracks = item["tracks"]
+        # playlists.append(f"{idx} {track['artists'][0]['name']} - {track['name']}")
+        playlists.append(
+            {
+                "name": item["name"],
+                "id": item["id"],
+                "public": item["public"],
+                "playlist_url": item["href"],
+                "tracks_url": item["tracks"].get("href"),
+                "tracks_count": item["tracks"].get("total"),
+                "image0": item.get("images")[0].get("url"),
+            }
+        )
+        print(f"{idx} {item}")
+
+    return playlists
+
+
+def get_playlist_tracks():
+    """ get tracks from a playlist
+    https://developer.spotify.com/console/get-playlist-tracks/
+    """
+    ...
 
 
 def get_auth_header():

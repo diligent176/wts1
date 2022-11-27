@@ -1,45 +1,125 @@
 {% extends "base.html" %}
+
 {% block title %}Your Profile{% endblock %}
+
 {% block content %}
 
-<!-- Response Data -->
-<div id="profile" class="media text-center ml-5 mr-5 outlinegreen">
-    {% if data.images %}
-    <div class="mr-4 outlinered">
-        <img class="media-object" width="150" src="{{ data.images.0.url }}" />
-    </div>
-    {% endif %}
-    <div class="media-bod">
-        <h1>Logged in as <i>{{ data.display_name }}</i></h1>
-        <dl class="dl-horizontal">
-            <dt>Id</dt>
-            <dd>{{ data.id }}</dd>
-            <dt>Email</dt>
-            <dd>{{ data.email }}</dd>
-            <dt>Country</dt>
-            <dd>{{ data.country }}</dd>
-            <dt>Followers</dt>
-            <dd>{{ data.followers.total }}</dd>
-            <dt>Account Type</dt>
-            <dd>{{ data.product }}</dd>
-            <dt>Spotify Url</dt>
-            <dd><a href="{{ data.external_urls.spotify }}">{{ data.external_urls.spotify }}</a></dd>
-            <dt>URI</dt>
-            <dd><a href="{{ data.uri }}">{{ data.uri }}</a></dd>
-        </dl>
-    </div>
+<!-- PROFILE DIV -->
+<div id="profile" class="align-content-center">
 
-    <div class="media-bod">
-        <h3>LIKED SONGS</h3>
-        <ul>
-            {% for t in tracks %}
-            <li>{{ t }}</li>
-            {% endfor %}
-        </ul>
+    <!-- PROFILE HEADER TABLE -->
+    <div class="text-left">
+        <table class="table">
+            <tr>
+                <td class="align-bottom w-50 outlinegreen">
+                    <h1>Logged in as <i>{{ data.display_name }}</i></h1>
+                </td>
+                <td class="align-bottom w-50 outlinered">
+                    &nbsp;
+                    {% if data.images %}
+                    <div>
+                        <img width="150" src="{{ data.images.0.url }}" />
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+
+        <!-- PROFILE DETAIL TABLE -->
+        <table class="table table-striped">
+            <tbody>
+                <tr>
+                    <td>Spotify Id</td>
+                    <td>
+                        <a href="{{ data.external_urls.spotify }}">{{ data.external_urls.spotify }}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Spotify URI</td>
+                    <td><a href="{{ data.uri }}">{{ data.uri }}</a></td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td>{{ data.email }}</td>
+                </tr>
+                <tr>
+                    <td>Country</td>
+                    <td>{{ data.country }}</td>
+                </tr>
+                <tr>
+                    <td>Followers</td>
+                    <td>{{ data.followers.total }}</td>
+                </tr>
+                <tr>
+                    <td>Account Type</td>
+                    <td>{{ data.product }}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
 </div>
 
+<!-- LIKED SONGS DIV -->
+<div id="liked" class="outlineblue">
+
+    <div class="media-bod text-center">
+
+        <table class="table table-striped text-center">
+            <thead>
+                <tr>
+                    <th class="text-center">
+                        <h3 class="text-center mt-5">LIKED SONGS</h3>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tracks %}
+                <tr>
+                    <td>{{ t }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
+<!-- PLAYLISTS DIV -->
+<div id="playlists">
+
+    <h3 class="text-center mt-5">PLAYLISTS</h3>
+
+    <div class="media-bod">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="text-center">Playlist Image</th>
+                    <th class="text-left">Playlist Name</th>
+                    <th class="text-center">Tracks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in playlists %}
+                <tr>
+                    <td class="text-center">
+                        <a href="{{ p['tracks_url'] }}" target="_blank">
+                            <img class="media-object" width="150" src="{{ p['image0'] }}" />
+                        </a>
+                    </td>
+                    <td class="text-left">{{ p['name'] }}</td>
+                    <td class="text-center">{{ p['tracks_count'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
+<!-- TOKENS -->
 <h2>Token Information</h2>
 <dl class="dl-horizontal" id="tokens">
     <dt>Access token</dt>
