@@ -212,8 +212,11 @@ def me():
             # add each track to pl_tracks
             pl_tracks.append(track)
 
-    # sort pl_tracks dictionary by track name
-    pl_tracks = sorted(pl_tracks, key=lambda d: d['track_name'])
+    # remove duplicates from pl_tracks
+    unique_pl_tracks = [dict(t) for t in {tuple(d.items()) for d in pl_tracks}]
+    
+    # sort unique_pl_tracks dict by track name
+    unique_pl_tracks = sorted(unique_pl_tracks, key=lambda d: d['track_name'])
     
     return render_template('me.html', data=me_data, tokens=session.get('tokens'), tracks=tracks, playlists=playlists, pl_tracks=pl_tracks)
 
