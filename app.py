@@ -164,22 +164,26 @@ def callback():
     me = get_me()
 
     # check if user exists in database
-    user_id = db.execute("SELECT id FROM users WHERE spotify_uri = ?", me.get("uri"))
+    user = db.execute("SELECT id, display_name, email, country, spotify_url, visited_timestamp FROM users WHERE spotify_uri = ?", me.get("uri"))
 
-    if user_id:
-        print(f"Returning user: {me.get('email')} [User_id: {user_id[0]['id']}]")
+    if user:
+        print(f"Returning user: {me.get('email')} [ID: {user[0]['id']}]")
         
+        # update user details and visited_timestamp
         # TO DO: wrap this with try? what do when it fails?
         result = db.execute("UPDATE users SET display_name = ?, email = ?, country = ?, visited_timestamp = ? WHERE id = ?",
                              me.get("display_name"),
                              me.get("email"),
                              me.get("country"),
                              datetime.utcnow(),
-                             user_id[0]['id']
+                             user[0]['id']
                              )
+        # Load user into session
+        session["user_id"] = user[0]['id']
+        session["last_visit"] = user[0].get("visited_timestamp")
 
     else:
-        # create new user record
+        # create a new user record
         # TO DO: wrap this with try? what do when it fails?
         result = db.execute("INSERT INTO users (display_name, email, country, spotify_uri, spotify_url) VALUES (?, ?, ?, ?, ?)",
                              me.get("display_name"),
@@ -188,8 +192,13 @@ def callback():
                              me.get("uri"),
                              me.get("external_urls").get("spotify"),
                              )
-        print(f"Created new user: {me.get('email')} [User_id: {result}]")
+        print(f"Created new user: {me.get('email')} [ID: {result}]")
+        
+        # Load user into session
+        session["user_id"] = result
+        session["last_visit"] = None
 
+    # login complete, go to app
     return redirect(url_for('me'))
 
 
