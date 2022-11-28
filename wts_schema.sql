@@ -3,15 +3,17 @@
 -- CREATE a new database simply by opening in "sqlite3 newdb.db"
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    fullname TEXT,
+    display_name TEXT,
     email TEXT,
     country TEXT,
     spotify_uri TEXT NOT NULL,
-    spotify_url TEXT
+    spotify_url TEXT,
+    visited_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
     );
 
-ALTER TABLE users ADD COLUMN spotify_url TEXT;
-ALTER TABLE users RENAME COLUMN fullname TO display_name;
+-- DROP TABLE users;
+-- ALTER TABLE users ADD COLUMN spotify_url TEXT;
+-- ALTER TABLE users RENAME COLUMN fullname TO display_name;
 
 CREATE INDEX spotify_uri ON users (spotify_uri);
 CREATE INDEX email ON users (email);

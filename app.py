@@ -12,6 +12,7 @@ from flask import (
 from flask_session import Session
 from urllib.parse import urlencode
 from cs50 import SQL
+from datetime import datetime
 import json
 import logging
 import os
@@ -167,6 +168,15 @@ def callback():
 
     if user_id:
         print(f"Returning user: {me.get('email')} [User_id: {user_id[0]['id']}]")
+        
+        # TO DO: wrap this with try? what do when it fails?
+        result = db.execute("UPDATE users SET display_name = ?, email = ?, country = ?, visited_timestamp = ? WHERE id = ?",
+                             me.get("display_name"),
+                             me.get("email"),
+                             me.get("country"),
+                             datetime.utcnow(),
+                             user_id[0]['id']
+                             )
 
     else:
         # create new user record
@@ -185,18 +195,15 @@ def callback():
 
 @app.route('/refresh')
 def refresh():
-    '''Refresh access token.'''
-
+    """ Refresh access token
+    """
     payload = {
         'grant_type': 'refresh_token',
         'refresh_token': session.get('tokens').get('refresh_token'),
     }
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
-    response = requests.post(
-        TOKEN_URL, auth=(
-            CLIENT_ID, CLIENT_SECRET), data=payload, headers=headers
-    )
+    response = requests.post(TOKEN_URL, auth=(CLIENT_ID, CLIENT_SECRET), data=payload, headers=headers)
     response_data = response.json()
 
     # Load new token into session
