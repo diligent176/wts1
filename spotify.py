@@ -10,7 +10,7 @@ import requests
 ME_URL = "https://api.spotify.com/v1/me"
 LIKED_URL = "https://api.spotify.com/v1/me/tracks"
 PLAYLISTS_URL = "https://api.spotify.com/v1/me/playlists"
-PLAYLISTITEMS_URL = "https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
+# PLAYLISTITEMS_URL = "https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
 # e.g. get tracks at https://api.spotify.com/v1/playlists/27hR4eUcVxpfZzZT7hKd4A/tracks
 
 
@@ -51,8 +51,17 @@ def get_liked_songs():
 
     for idx, item in enumerate(response_data["items"]):
         track = item["track"]
-        tracks.append(f"{(idx+1):02d} - {track['name']} ({track['artists'][0]['name']})")
+        # tracks.append(f"{(idx+1):02d} - {track['name']} ({track['artists'][0]['name']})")
         # print(f"{(idx+1):02d} - {track['name']} ({track['artists'][0]['name']})")
+
+        tracks.append(
+            {
+                "number": f"{(idx+1):02d}",
+                "track_name": item.get("track").get("name"),
+                "track_album": item.get("track").get("album").get("name"),
+                "track_artist": item.get("track").get("artists")[0].get("name"),
+            }
+        )
 
     return tracks
 
@@ -88,16 +97,45 @@ def get_playlists():
             }
         )
         # print(f"{idx} {item}")
-        sorted_playlists = sorted(playlists, key=lambda d: d['tracks_count'], reverse=True)
+    
+    sorted_playlists = sorted(playlists, key=lambda d: d['tracks_count'], reverse=True)
 
     return sorted_playlists
 
 
-def get_playlist_tracks():
+def get_playlist_tracks(playlist_url):
     """ get tracks from a playlist
     https://developer.spotify.com/console/get-playlist-tracks/
     """
-    ...
+    playlist_tracks = []
+    auth_header = get_auth_header()
+
+    response = requests.get(playlist_url, headers=auth_header)
+    response_data = response.json()
+
+    if response.status_code != 200:
+        logging.error(
+            f"get_playlist_tracks() failed - HTTP {response.status_code} {response_data.get('error', 'No error message was returned.')}")
+        # TO DO: handle 403 and other errors gracefully
+        abort(response.status_code)
+
+    # for idx, item in enumerate(response_data["items"]):
+    for item in response_data["tracks"]["items"]:
+        playlist_tracks.append(
+            {
+                "track_id": item.get("track").get("id"),
+                "track_name": item.get("track").get("name"),
+                "track_artist": item.get("track").get("artists")[0].get("name"),
+                "track_album": item.get("track").get("album").get("name"),
+                "track_uri": item.get("track").get("uri"),
+                "track_href": item.get("track").get("href"),
+                "image0": item.get("track").get("album").get("images")[0].get("url"),
+            }
+        )
+    
+    sorted_tracks = sorted(playlist_tracks, key=lambda d: d['track_name'])
+
+    return sorted_tracks
 
 
 def get_auth_header():

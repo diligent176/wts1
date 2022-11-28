@@ -14,6 +14,7 @@
 - (C:\github\spotify-api-auth-examples-PYTHON)
 
 ### BOOTSTRAP
+- BOOTSTRAP GRIDS: https://getbootstrap.com/docs/5.1/layout/grid/
 - https://www.w3schools.com/bootstrap/default.asp
 - https://www.w3schools.com/bootstrap/bootstrap_ref_all_classes.asp
 - https://www.w3schools.com/bootstrap/bootstrap_ref_css_text.asp

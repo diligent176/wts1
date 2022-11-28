@@ -99,7 +99,8 @@ def login():
 
     # because redirect_uri could be guessed
     # generate random state to prevent CSRF
-    state = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(16))
+    state = ''.join(secrets.choice(string.ascii_uppercase +
+                    string.digits) for _ in range(16))
 
     # Request user to authorize these scopes
     scope = 'user-read-private user-read-email user-library-read'
@@ -141,7 +142,8 @@ def callback():
 
     # auth=(CLIENT_ID, SECRET) wraps an 'Authorization' header with value:
     # b'Basic ' + b64encode((CLIENT_ID + ':' + SECRET).encode())
-    response = requests.post(TOKEN_URL, auth=(CLIENT_ID, CLIENT_SECRET), data=payload)
+    response = requests.post(TOKEN_URL, auth=(
+        CLIENT_ID, CLIENT_SECRET), data=payload)
     response_data = response.json()
 
     if response_data.get('error') or response.status_code != 200:
@@ -171,7 +173,8 @@ def refresh():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
     response = requests.post(
-        TOKEN_URL, auth=(CLIENT_ID, CLIENT_SECRET), data=payload, headers=headers
+        TOKEN_URL, auth=(
+            CLIENT_ID, CLIENT_SECRET), data=payload, headers=headers
     )
     response_data = response.json()
 
@@ -183,20 +186,36 @@ def refresh():
 
 @app.route('/me')
 def me():
-    """ Display current user information """
+    """ Display all current user details """
 
     # Check tokens
     if 'tokens' not in session:
         app.logger.info('No tokens in session. Redirect user to login.')
         return redirect('/')
 
-    me = spotify.get_me()
-    tracks = spotify.get_liked_songs()
-    playlists = spotify.get_playlists()
-    # sorted_playlists = sorted(playlists, key=lambda d: d['tracks_count'], reverse=True)
-    # print(playlists)
+    # get user's spotify profile
+    me_data = spotify.get_me()
     
-    return render_template('me.html', data=me, tokens=session.get('tokens'), tracks=tracks, playlists=playlists)
+    # get user's liked songs
+    tracks = spotify.get_liked_songs()
+
+    # get user's playlists
+    playlists = spotify.get_playlists()
+
+    # get tracks from each playlist
+    pl_tracks = []
+    for pl in playlists:
+        # get tracks from each playlist
+        temp_tracks = spotify.get_playlist_tracks(pl["playlist_url"])
+
+        for track in temp_tracks:
+            # add each track to pl_tracks
+            pl_tracks.append(track)
+
+    # sort pl_tracks dictionary by track name
+    pl_tracks = sorted(pl_tracks, key=lambda d: d['track_name'])
+    
+    return render_template('me.html', data=me_data, tokens=session.get('tokens'), tracks=tracks, playlists=playlists, pl_tracks=pl_tracks)
 
 
 @app.route('/liked')
