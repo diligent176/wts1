@@ -15,6 +15,7 @@
 
 ### BOOTSTRAP
 - BOOTSTRAP GRIDS: https://getbootstrap.com/docs/5.1/layout/grid/
+- CSS FLEXBOX: https://css-tricks.com/snippets/css/a-guide-to-flexbox/#flexbox-background
 - https://www.w3schools.com/bootstrap/default.asp
 - https://www.w3schools.com/bootstrap/bootstrap_ref_all_classes.asp
 - https://www.w3schools.com/bootstrap/bootstrap_ref_css_text.asp

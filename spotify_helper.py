@@ -60,6 +60,7 @@ def get_liked_songs():
                 "track_name": item.get("track").get("name"),
                 "track_album": item.get("track").get("album").get("name"),
                 "track_artist": item.get("track").get("artists")[0].get("name"),
+                "track_uri": item.get("track").get("uri"),
             }
         )
 

@@ -18,7 +18,7 @@ import os
 import requests
 import secrets
 import string
-import spotify
+from spotify_helper import get_me, get_liked_songs, get_playlists, get_playlist_tracks
 
 
 logging.basicConfig(
@@ -52,8 +52,8 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 # app.config["SESSION_TYPE"] = "filesystem"
 # Session(app)
 
-# Configure CS50 Library to use SQLite database
-# db = SQL("sqlite:///wts.db")
+# CS50 library for easy sqlite usage (wraps SQLAlchemy)
+db = SQL("sqlite:///wts.db")
 
 # check ENVT VARS are set
 if not CLIENT_ID:
@@ -159,6 +159,27 @@ def callback():
         'refresh_token': response_data.get('refresh_token'),
     }
 
+    # get user's spotify profile
+    me = get_me()
+
+    # check if user exists in database
+    user_id = db.execute("SELECT id FROM users WHERE spotify_uri = ?", me.get("uri"))
+
+    if user_id:
+        print(f"Returning user: {me.get('email')} [User_id: {user_id[0]['id']}]")
+
+    else:
+        # create new user record
+        # TO DO: wrap this with try? what do when it fails?
+        result = db.execute("INSERT INTO users (display_name, email, country, spotify_uri, spotify_url) VALUES (?, ?, ?, ?, ?)",
+                             me.get("display_name"),
+                             me.get("email"),
+                             me.get("country"),
+                             me.get("uri"),
+                             me.get("external_urls").get("spotify"),
+                             )
+        print(f"Created new user: {me.get('email')} [User_id: {result}]")
+
     return redirect(url_for('me'))
 
 
@@ -194,19 +215,19 @@ def me():
         return redirect('/')
 
     # get user's spotify profile
-    me_data = spotify.get_me()
+    me = get_me()
     
     # get user's liked songs
-    tracks = spotify.get_liked_songs()
+    tracks = get_liked_songs()
 
     # get user's playlists
-    playlists = spotify.get_playlists()
+    playlists = get_playlists()
 
     # get tracks from each playlist
     pl_tracks = []
     for pl in playlists:
         # get tracks from each playlist
-        temp_tracks = spotify.get_playlist_tracks(pl["playlist_url"])
+        temp_tracks = get_playlist_tracks(pl["playlist_url"])
 
         for track in temp_tracks:
             # add each track to pl_tracks
@@ -218,7 +239,7 @@ def me():
     # sort unique_pl_tracks dict by track name
     unique_pl_tracks = sorted(unique_pl_tracks, key=lambda d: d['track_name'])
     
-    return render_template('me.html', data=me_data, tokens=session.get('tokens'), tracks=tracks, playlists=playlists, pl_tracks=pl_tracks)
+    return render_template('me.html', data=me, tokens=session.get('tokens'), tracks=tracks, playlists=playlists, pl_tracks=pl_tracks)
 
 
 @app.route('/liked')
