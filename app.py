@@ -9,10 +9,10 @@ from flask import (
     url_for,
     send_from_directory
 )
-from flask_session import Session
+# from flask_session import Session
 from urllib.parse import urlencode
-from cs50 import SQL
-from datetime import datetime
+# from cs50 import SQL
+# from datetime import datetime
 import json
 import logging
 import os
@@ -20,6 +20,7 @@ import requests
 import secrets
 import string
 from spotify_helper import get_me, get_liked_songs, get_playlists, get_playlist_tracks
+from db_helper import create_user, update_user, get_user
 
 
 logging.basicConfig(
@@ -43,7 +44,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(16)
 
 # set flask templates auto-reload
-app.config["TEMPLATES_AUTO_RELOAD"] = True
+# app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 # Custom filter
 # app.jinja_env.filters["usd"] = usd
@@ -54,7 +55,7 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 # Session(app)
 
 # CS50 library for easy sqlite usage (wraps SQLAlchemy)
-db = SQL("sqlite:///wts.db")
+# db = SQL("sqlite:///wts.db")
 
 # check ENVT VARS are set
 if not CLIENT_ID:
@@ -164,41 +165,40 @@ def callback():
     me = get_me()
 
     # check if user exists in database
-    user = db.execute("SELECT id, display_name, email, country, spotify_url, visited_timestamp FROM users WHERE spotify_uri = ?", me.get("uri"))
+    user = get_user(me.get("uri"))
 
     if user:
         print(f"Returning user: {me.get('email')} [ID: {user[0]['id']}]")
-        
-        # update user details and visited_timestamp
-        # TO DO: wrap this with try? what do when it fails?
-        result = db.execute("UPDATE users SET display_name = ?, email = ?, country = ?, visited_timestamp = ? WHERE id = ?",
-                             me.get("display_name"),
+
+        # UPDATE user details and visited_timestamp
+        # TO DO: wrap with try/except? what do when it fails?
+        result = update_user(me.get("display_name"),
                              me.get("email"),
                              me.get("country"),
-                             datetime.utcnow(),
                              user[0]['id']
                              )
+
         # Load user into session
         session["user_id"] = user[0]['id']
         session["last_visit"] = user[0].get("visited_timestamp")
 
     else:
-        # create a new user record
-        # TO DO: wrap this with try? what do when it fails?
-        result = db.execute("INSERT INTO users (display_name, email, country, spotify_uri, spotify_url) VALUES (?, ?, ?, ?, ?)",
-                             me.get("display_name"),
+        # CREATE a new user record
+        # TO DO: wrap with try/except? what do when it fails?
+        result = create_user(me.get("display_name"),
                              me.get("email"),
                              me.get("country"),
                              me.get("uri"),
-                             me.get("external_urls").get("spotify"),
+                             me.get("external_urls").get("spotify")
                              )
-        print(f"Created new user: {me.get('email')} [ID: {result}]")
-        
+
+        print(f"Created a new user: {me.get('email')} [ID: {result}]")
+
         # Load user into session
         session["user_id"] = result
         session["last_visit"] = None
 
-    # login complete, go to app
+    # login processing completed, go to app
     return redirect(url_for('me'))
 
 
@@ -212,7 +212,8 @@ def refresh():
     }
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 
-    response = requests.post(TOKEN_URL, auth=(CLIENT_ID, CLIENT_SECRET), data=payload, headers=headers)
+    response = requests.post(TOKEN_URL, auth=(
+        CLIENT_ID, CLIENT_SECRET), data=payload, headers=headers)
     response_data = response.json()
 
     # Load new token into session
@@ -232,7 +233,7 @@ def me():
 
     # get user's spotify profile
     me = get_me()
-    
+
     # get user's liked songs
     tracks = get_liked_songs()
 
@@ -251,10 +252,10 @@ def me():
 
     # remove duplicates from pl_tracks
     unique_pl_tracks = [dict(t) for t in {tuple(d.items()) for d in pl_tracks}]
-    
+
     # sort unique_pl_tracks dict by track name
     unique_pl_tracks = sorted(unique_pl_tracks, key=lambda d: d['track_name'])
-    
+
     return render_template('me.html', data=me, tokens=session.get('tokens'), tracks=tracks, playlists=playlists, pl_tracks=pl_tracks)
 
 
