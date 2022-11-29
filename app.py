@@ -71,13 +71,16 @@ def after_request(response):
 
 @app.route('/')
 def index():
-    # If user not logged in...
-    # Welcome page - ask user to login w/ Spotify
-    return render_template('login.html')
 
-    # If user IS logged in...
+    # Check if logged in user
+    if "user_id" not in session:
+        # not logged in - ask user to login w/ Spotify
+        return render_template('login.html')
+
+    # Otherwise, user IS logged in...
     # Refresh user tracks DB
     # Play the game
+    return render_template('game.html')
 
 
 @app.route('/logout')
@@ -193,7 +196,7 @@ def me():
     """ Display all current user details """
 
     # Check tokens
-    if 'tokens' not in session:
+    if "tokens" not in session:
         app.logger.info('No tokens in session. Redirect user to login.')
         return redirect('/')
 

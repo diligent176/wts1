@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}
+GAME
+{% endblock %}
+
+{% block content %}
+<div class="text-center ml-5 mr-5">
+    <h1 class="mt-5 mb-5 pt-3">
+        PLAY THE GAME
+    </h1>
+
+    <h1>USER ID: <i>{{ session["user_id"] }}</i></h1>
+
+    <h4 class="mt-5 mb-3">
+        A Lyrics Trivia Game
+    </h4>
+    <p class="largetext mt-3 mb-1">
+        Guess the song lyrics from your favorite Spotify Songs &amp; Artists!
+    </p>
+    <p class="largetext mb-5">
+        Try to beat high scores of other spotify users.
+    </p>
+
+
+</div>
+{% endblock %}
