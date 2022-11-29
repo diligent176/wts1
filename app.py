@@ -11,36 +11,42 @@ from flask import (
 )
 # from flask_session import Session
 from urllib.parse import urlencode
-# from cs50 import SQL
-# from datetime import datetime
 import json
 import logging
 import os
 import requests
 import secrets
 import string
+import db_helper
 from spotify_helper import get_me, get_liked_songs, get_playlists, get_playlist_tracks
-from db_helper import create_user, update_user, get_user
 
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG
 )
 
-# environmental constants
+# Spotify AuthN API endpoints
+AUTH_URL = 'https://accounts.spotify.com/authorize'
+TOKEN_URL = 'https://accounts.spotify.com/api/token'
+
+# FETCH environment constants
 CLIENT_ID = os.environ.get("WTS_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("WTS_CLIENT_SECRET")
 REDIRECT_URI = os.environ.get("WTS_REDIRECT_URI")
 
-# Spotify API endpoints
-AUTH_URL = 'https://accounts.spotify.com/authorize'
-TOKEN_URL = 'https://accounts.spotify.com/api/token'
+# CHECK environment constants
+if not CLIENT_ID:
+    raise RuntimeError("CLIENT_ID not set")
+if not CLIENT_SECRET:
+    raise RuntimeError("CLIENT_SECRET not set")
+if not REDIRECT_URI:
+    raise RuntimeError("REDIRECT_URI not set")
 
 
 # set flask app
 app = Flask(__name__)
-# TO DO: why app.secret_key for flask - signed cookie?
-# Session breaks without this...  <SecureCookieSession {}>
+
+# for flask signed cookies
 app.secret_key = os.urandom(16)
 
 # set flask templates auto-reload
@@ -54,24 +60,6 @@ app.secret_key = os.urandom(16)
 # app.config["SESSION_TYPE"] = "filesystem"
 # Session(app)
 
-# CS50 library for easy sqlite usage (wraps SQLAlchemy)
-# db = SQL("sqlite:///wts.db")
-
-# check ENVT VARS are set
-if not CLIENT_ID:
-    raise RuntimeError("CLIENT_ID not set")
-if not CLIENT_SECRET:
-    raise RuntimeError("CLIENT_SECRET not set")
-if not REDIRECT_URI:
-    raise RuntimeError("REDIRECT_URI not set")
-else:
-    print(f"********* ENVIRONMENT ************")
-    print(f"CLIENT_ID IS: {CLIENT_ID}")
-    print(f"CLIENT_SECRET IS: {CLIENT_SECRET}")
-    print(f"REDIRECT_URI IS: {REDIRECT_URI}")
-    print(f"********* END ENVIRONMENT ************")
-
-
 @app.after_request
 def after_request(response):
     # to disable browser caching
@@ -83,9 +71,13 @@ def after_request(response):
 
 @app.route('/')
 def index():
-    # Welcome and info page
-    # ask user to login to Spotify
+    # If user not logged in...
+    # Welcome page - ask user to login w/ Spotify
     return render_template('login.html')
+
+    # If user IS logged in...
+    # Refresh user tracks DB
+    # Play the game
 
 
 @app.route('/logout')
@@ -129,13 +121,13 @@ def callback():
     state = request.args.get('state')
     stored_state = request.cookies.get('spotify_auth_state')
 
-    # Check state
+    # Check for state tampering
     if state is None or state != stored_state:
         app.logger.error('Error message: %s', repr(error))
         app.logger.error('State mismatch: %s != %s', stored_state, state)
         abort(400)
 
-    # Request tokens with code we obtained
+    # Request tokens using code from callback
     payload = {
         'grant_type': 'authorization_code',
         'code': code,
@@ -155,48 +147,22 @@ def callback():
         )
         abort(response.status_code)
 
-    # Load tokens into session
+    # Load Spotify API tokens into session
     session['tokens'] = {
         'access_token': response_data.get('access_token'),
         'refresh_token': response_data.get('refresh_token'),
     }
 
-    # get user's spotify profile
+    # fetch user's spotify profile
     me = get_me()
 
-    # check if user exists in database
-    user = get_user(me.get("uri"))
-
-    if user:
-        print(f"Returning user: {me.get('email')} [ID: {user[0]['id']}]")
-
-        # UPDATE user details and visited_timestamp
-        # TO DO: wrap with try/except? what do when it fails?
-        result = update_user(me.get("display_name"),
-                             me.get("email"),
-                             me.get("country"),
-                             user[0]['id']
-                             )
-
-        # Load user into session
-        session["user_id"] = user[0]['id']
-        session["last_visit"] = user[0].get("visited_timestamp")
-
-    else:
-        # CREATE a new user record
-        # TO DO: wrap with try/except? what do when it fails?
-        result = create_user(me.get("display_name"),
-                             me.get("email"),
-                             me.get("country"),
-                             me.get("uri"),
-                             me.get("external_urls").get("spotify")
-                             )
-
-        print(f"Created a new user: {me.get('email')} [ID: {result}]")
-
-        # Load user into session
-        session["user_id"] = result
-        session["last_visit"] = None
+    # SET USER (create/update user)
+    db_helper.set_user(me.get("display_name"),
+                       me.get("email"),
+                       me.get("country"),
+                       me.get("uri"),
+                       me.get("external_urls").get("spotify")
+                       )
 
     # login processing completed, go to app
     return redirect(url_for('me'))

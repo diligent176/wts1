@@ -140,7 +140,7 @@ def get_playlist_tracks(playlist_url):
 
 
 def get_auth_header():
-
+    """ Assemble the bearer token for various API calls """
     at = session['tokens'].get('access_token')
     bt = {'Authorization': f"Bearer {at}"}
     return bt
