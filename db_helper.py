@@ -87,8 +87,7 @@ def create_user(display_name, email, country, spotify_uri, spotify_url):
 
 def get_tracks(user_id):
     """ GET user's tracks from db """
-    ...
-    result = db.execute("SELECT track_name, track_artist, track_album, track_uri FROM tracks WHERE user_id = ?",
+    result = db.execute("SELECT id, track_name, track_artist, track_album, track_uri FROM tracks WHERE user_id = ?",
                         user_id
                         )
     return result

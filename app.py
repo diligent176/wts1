@@ -79,10 +79,13 @@ def index():
         # not logged in - ask user to login w/ Spotify
         return render_template('login.html')
 
-    # Otherwise, user IS logged in...
-    # Refresh user tracks DB
+    # Otherwise, user IS logged in... GAME ON
+
+    current_track = game_helper.random_track(session["user_id"])
+    # print(current_track)
+
     # Play the game
-    return render_template('game.html')
+    return render_template('game.html', current_track=current_track)
 
 
 @app.route('/logout')
@@ -175,7 +178,8 @@ def callback():
     
     # login processing completed, go to game
     # TO DO: replace /me with GAME at root /
-    return redirect(url_for('me'))
+    # return redirect(url_for('me'))
+    return redirect('/')
 
 
 @app.route('/refresh')

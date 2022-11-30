@@ -3,6 +3,10 @@
     font-size: larger;
 }
 
+.xsmalltext {
+    font-size: x-small;
+}
+
 ol.nonum {
     list-style: none;
 }
