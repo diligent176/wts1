@@ -29,6 +29,9 @@ def set_user(display_name, email, country, uri, url):
         session["user_id"] = user[0]['id']
         session["last_visit"] = user[0].get("visited_timestamp")
 
+        # return the existing user id
+        return user[0]['id']
+
     else:
         # CREATE new user record
         # TO DO: wrap with try/except? what do when it fails?
@@ -45,6 +48,9 @@ def set_user(display_name, email, country, uri, url):
         # Load user into session
         session["user_id"] = result
         session["last_visit"] = None
+
+        # return the new user id
+        return result
 
 
 def get_db_user(uri):

@@ -18,11 +18,13 @@ import requests
 import secrets
 import string
 import db_helper
-from spotify_helper import get_me, get_liked_songs, get_playlists, get_playlist_tracks
+import game_helper
+import spotify_helper
+# from spotify_helper import get_me, get_liked_songs, get_playlists, get_playlist_tracks
 
 
 logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG
+    format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO
 )
 
 # Spotify AuthN API endpoints
@@ -157,17 +159,22 @@ def callback():
     }
 
     # fetch user's spotify profile
-    me = get_me()
+    me = spotify_helper.get_me()
 
     # SET USER (create/update user)
-    db_helper.set_user(me.get("display_name"),
+    user_id = db_helper.set_user(me.get("display_name"),
                        me.get("email"),
                        me.get("country"),
                        me.get("uri"),
                        me.get("external_urls").get("spotify")
                        )
 
-    # login processing completed, go to app
+    # Refresh user tracks in db
+    tracks_count = build_songs_db(user_id)
+
+    
+    # login processing completed, go to game
+    # TO DO: replace /me with GAME at root /
     return redirect(url_for('me'))
 
 
@@ -201,19 +208,19 @@ def me():
         return redirect('/')
 
     # get user's spotify profile
-    me = get_me()
+    me = spotify_helper.get_me()
 
     # get user's liked songs
-    tracks = get_liked_songs()
+    tracks = spotify_helper.get_liked_songs()
 
     # get user's playlists
-    playlists = get_playlists()
+    playlists = spotify_helper.get_playlists()
 
     # get tracks from each playlist
     pl_tracks = []
     for pl in playlists:
         # get tracks from each playlist
-        temp_tracks = get_playlist_tracks(pl["playlist_url"])
+        temp_tracks = spotify_helper.get_playlist_tracks(pl["playlist_url"])
 
         for track in temp_tracks:
             # add each track to pl_tracks
@@ -237,3 +244,45 @@ def liked():
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+def build_songs_db(user_id):
+    """ Build the user's song list in the database """
+
+    # get user's liked songs
+    liked_tracks = spotify_helper.get_liked_songs()
+
+    # get user's playlists
+    playlists = spotify_helper.get_playlists()
+
+    # get tracks from each playlist
+    pl_tracks = []
+    for pl in playlists:
+        # get tracks from each playlist
+        temp_tracks = spotify_helper.get_playlist_tracks(pl["playlist_url"])
+
+        for track in temp_tracks:
+            # add each track to pl_tracks
+            pl_tracks.append(track)
+
+    # remove duplicates from pl_tracks
+    unique_pl_tracks = [dict(t) for t in {tuple(d.items()) for d in pl_tracks}]
+
+    # sort unique_pl_tracks dict by track name
+    unique_pl_tracks = sorted(unique_pl_tracks, key=lambda d: d['track_name'])
+
+    # delete this user's tracks from db
+    deleted_count = db_helper.delete_tracks(user_id)
+
+    tracks_count = 0
+
+    # insert tracks to database
+    for track in liked_tracks:
+        db_helper.create_track(user_id, track["track_name"], track["track_artist"], track["track_album"], track["track_uri"])
+        tracks_count += 1
+
+    for track in unique_pl_tracks:
+        db_helper.create_track(user_id, track["track_name"], track["track_artist"], track["track_album"], track["track_uri"])
+        tracks_count += 1
+
+    # return total count of tracks inserted for the user
+    return tracks_count
