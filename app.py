@@ -84,8 +84,11 @@ def index():
     current_track = game_helper.random_track(session["user_id"])
     # print(current_track)
 
+    lyrics = game_helper.fetch_lyrics(current_track["track_artist"], current_track["track_name"])
+    # print(lyrics)
+
     # Play the game
-    return render_template('game.html', current_track=current_track)
+    return render_template('game.html', current_track=current_track, lyrics=lyrics)
 
 
 @app.route('/logout')

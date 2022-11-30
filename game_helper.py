@@ -1,6 +1,7 @@
 import db_helper
+import requests
 from random import randrange
-
+from bs4 import BeautifulSoup
 
 def random_track(user_id):
     """ Pick a random track from user's library 
@@ -23,6 +24,33 @@ def random_track(user_id):
     return random_track
 
 
-def fetch_lyrics():
+def fetch_lyrics(track_artist, track_name):
     """ Get Song Lyrics from Genius.com """
-    ...
+
+    artistname2 = str(track_artist.replace(' ','-')) if ' ' in track_artist else str(track_artist)
+    songname2 = str(track_name.replace(' ','-')) if ' ' in track_name else str(track_name)
+    
+    # url = 'https://genius.com/'+ artistname2 + '-' + songname2 + '-' + 'lyrics'
+    url = f"https://genius.com/{artistname2}-{songname2}-lyrics".replace('...','-')
+    page = requests.get(url)
+
+    html = BeautifulSoup(page.text, 'html.parser')
+    lyrics1 = html.find("div", class_="lyrics")
+    
+    # lyrics1 = html.find(id="lyrics")
+    # lyrics1 = html.find("div", {"class": "Lyrics__Container-sc-1ynbvzw-6 YYrds"})
+    # lyrics1 = html.class("Lyrics__Container-sc-1ynbvzw-6 YYrds")
+    # soup.find("span", {"class": "real number", "data-value": True})['data-value']
+
+    lyrics2 = html.find("div", class_="Lyrics__Container-sc-1ynbvzw-6 YYrds")
+
+    if lyrics1:
+        lyrics = lyrics1.get_text()
+    elif lyrics2:
+        # lyrics2.replace('<br>','\r\n')
+        # lyrics = lyrics2.get_text()
+        lyrics = lyrics2.get_text(separator='\r\n')
+        # lyrics = lyrics2.replace('<br>','\r\n').get_text()
+    elif lyrics1 == lyrics2 == None:
+        lyrics = None
+    return lyrics

@@ -38,10 +38,11 @@
             <div class="collapse navbar-collapse" id="navbar">
                 {% if session["user_id"] %}
                 <ul class="navbar-nav me-auto mt-2">
-                    <li class="nav-item"><a class="nav-link" href="/">PLAY NOW!!!</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/">Yes, right NOW</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/">PLAY NOW!</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/me">My User Profile</a></li>
                 </ul>
                 <ul class="navbar-nav ms-auto mt-2">
+                    <li class="nav-item"><a class="nav-link" href="/me">Last Visit: {{ session["last_visit"] }}</a></li>
                     <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                 </ul>
                 {% else %}
