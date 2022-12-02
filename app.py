@@ -97,6 +97,7 @@ def sign_out():
     # delete tokens from session and return home
     # TO DO: flash a message?
     session.pop("tokens", None)
+    session.pop("user_id", None)
     return redirect('/')
 
 
