@@ -6,12 +6,20 @@ import urllib.parse
 import xmltodict
 import logging
 
+from fp.fp import FreeProxy
 
 from pprint import pprint
 
+
+# https://github.com/jundymek/free-proxy
+
+
 CHART_LYRICS_API_SEARCH_URL = "http://api.chartlyrics.com/apiv1.asmx/SearchLyric"
 CHART_LYRICS_API_GETLYRIC_URL = "http://api.chartlyrics.com/apiv1.asmx/GetLyric"
+GENIUS_EXAMPLE_URL = "https://genius.com/Incubus-anna-molly-lyrics"         # 'https://genius.com/'+ artistname + '-' + songname + '-' + 'lyrics'
 
+USE_PROXY = True
+PROXIES = {}
 
 def random_track(user_id):
     """ Pick a random track from user's library 
@@ -37,22 +45,31 @@ def random_track(user_id):
 def fetch_lyrics(track_artist, track_name):
     """ Get Song Lyrics from Genius.com """
 
-    # artistname2 = str(track_artist.replace(' ','-')) if ' ' in track_artist else str(track_artist)
-    # songname2 = str(track_name.replace(' ','-')) if ' ' in track_name else str(track_name)
-
     artistname = fix_name(track_artist)
     songname = fix_name(track_name)
 
     # url = 'https://genius.com/'+ artistname + '-' + songname + '-' + 'lyrics'
     url = f"https://genius.com/{artistname}-{songname}-lyrics".replace(
         '...', '-').replace('-/-', '-')
-    page = requests.get(url)
+    
+    # if use proxy server true, make sure one is selected
+    global USE_PROXY
+    global PROXIES
+    if USE_PROXY and len(PROXIES) == 0:
+        PROXIES = find_proxies()
+
+    if USE_PROXY:
+        s = requests.Session()
+        s.proxies = PROXIES
+        page = s.get(url)
+    else:
+        page = requests.get(url)
+
 
     html = BeautifulSoup(page.text, 'html.parser')
     lyrics = html.find("div", class_="Lyrics__Container-sc-1ynbvzw-6 YYrds")
     if lyrics:
         lyrics = lyrics.get_text(separator='\r\n')
-        # lyrics = lyrics2.replace('<br>','\r\n').get_text()
 
     return lyrics
 
@@ -185,3 +202,22 @@ def fix_name(name):
 #     """ Convert \r\n to html br"""
 #     lyric = lyric.replace('"','')
 #     return lyric.replace('\r\n','<br />')
+
+def find_proxies():
+    
+    # proxy = FreeProxy(https=True).get()
+    # proxy = FreeProxy(https=True).get()
+    proxy = FreeProxy(country_id=['US']).get()
+    # proxy = FreeProxy(country_id=['US', 'BR'], https=True, rand=True, timeout=1).get()
+    # proxy = FreeProxy(country_id=['US'], rand=True, timeout=1).get()
+
+    proxies = {
+    'http': proxy,
+    'https': proxy,
+    }
+
+    print("########## PROXY SELECTED ##########")
+    pprint(proxies)
+    print("########## ########## ##########")
+
+    return proxy
