@@ -40,7 +40,7 @@ def get_liked_songs():
     tracks = []
     auth_header = get_auth_header()
 
-    response = requests.get(LIKED_URL, headers=auth_header)
+    response = requests.get(f"{LIKED_URL}?limit=50", headers=auth_header)
     response_data = response.json()
 
     if response.status_code != 200:
@@ -49,20 +49,29 @@ def get_liked_songs():
         # TO DO: handle 403 and other errors gracefully
         abort(response.status_code)
 
-    for idx, item in enumerate(response_data["items"]):
-        track = item["track"]
-        # tracks.append(f"{(idx+1):02d} - {track['name']} ({track['artists'][0]['name']})")
-        # print(f"{(idx+1):02d} - {track['name']} ({track['artists'][0]['name']})")
+    # keep fetching if there is "next page" in result json
+    next_page = response_data.get("next")
 
-        tracks.append(
-            {
-                "number": f"{(idx+1):02d}",
-                "track_name": item.get("track").get("name"),
-                "track_album": item.get("track").get("album").get("name"),
-                "track_artist": item.get("track").get("artists")[0].get("name"),
-                "track_uri": item.get("track").get("uri"),
-            }
-        )
+    while True:
+        for idx, item in enumerate(response_data["items"]):
+            tracks.append(
+                {
+                    "number": f"{(idx+1):02d}",
+                    "track_name": item.get("track").get("name"),
+                    "track_album": item.get("track").get("album").get("name"),
+                    "track_artist": item.get("track").get("artists")[0].get("name"),
+                    "track_uri": item.get("track").get("uri"),
+                }
+            )
+
+        if next_page:
+            # fetch next 50
+            more = requests.get(next_page, headers=auth_header)
+            response_data = more.json()
+            next_page = response_data.get("next")
+        else:
+            # no more results to fetch
+            break
 
     return tracks
 
@@ -75,7 +84,7 @@ def get_playlists():
     playlists = []
     auth_header = get_auth_header()
 
-    response = requests.get(PLAYLISTS_URL, headers=auth_header)
+    response = requests.get(f"{PLAYLISTS_URL}?limit=50", headers=auth_header)
     response_data = response.json()
 
     if response.status_code != 200:
@@ -84,7 +93,6 @@ def get_playlists():
         # TO DO: handle 403 and other errors gracefully
         abort(response.status_code)
 
-    # for idx, item in enumerate(response_data["items"]):
     for item in response_data["items"]:
         playlists.append(
             {
@@ -97,7 +105,6 @@ def get_playlists():
                 "image0": item.get("images")[0].get("url"),
             }
         )
-        # print(f"{idx} {item}")
     
     sorted_playlists = sorted(playlists, key=lambda d: d['tracks_count'], reverse=True)
 

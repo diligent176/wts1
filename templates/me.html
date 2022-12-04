@@ -73,6 +73,12 @@
                 </tr>
             </thead>
             <tbody>
+                {% if tracks | length == 0 %}
+                <tr>
+                    <td><h5 class="text-danger">PLEASE LIKE SOME SONGS TO PLAY THIS GAME</h5></td>
+                </tr>
+                {% endif %}
+
                 {% for t in tracks %}
                 <tr>
                     <td>{{ t.number }}: {{ t.track_name }} &nbsp; // by {{ t.track_artist }} &nbsp; (Album: {{ t.track_album }})</td>
@@ -100,6 +106,12 @@
                 </tr>
             </thead>
             <tbody>
+                {% if playlists | length == 0 %}
+                <tr>
+                    <td colspan="3" class="text-center"><h5 class="text-danger">PLEASE CREATE SOME PLAYLISTS TO PLAY THIS GAME</h5></td>
+                </tr>
+                {% endif %}
+
                 {% for p in playlists %}
                 <tr>
                     <td class="text-center">

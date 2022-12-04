@@ -93,8 +93,8 @@ def chart_lyrics_search(artist, song):
     results_dict = response_dict.get("ArrayOfSearchLyricResult")
 
     # pprint(results_dict["SearchLyricResult"])
-    print(
-        f"\n\nLENGTH OF results_dict: {len(results_dict['SearchLyricResult'])}\n\n")
+    # print(
+    #     f"\n\nLENGTH OF results_dict: {len(results_dict['SearchLyricResult'])}\n\n")
 
     if results_dict:
         # if SearchLyricResult was present in the XML
@@ -126,8 +126,8 @@ def chart_lyrics_search(artist, song):
                     }
                 )
 
-        pprint(search_hits)
-        print(f"\n\nLENGTH OF search_hits: {len(search_hits)}\n\n")
+        # pprint(search_hits)
+        # print(f"\n\nLENGTH OF search_hits: {len(search_hits)}\n\n")
 
     # If no good result, try cutting words from song or artist...
 
@@ -166,7 +166,7 @@ def chart_lyrics_get_lyric(lyric_id, checksum):
     response_dict = xmltodict.parse(response.content, process_namespaces=False)
 
     # pprint(response_dict) # response_dict["GetLyricResult"]["Lyric"]
-    pprint(response_dict["GetLyricResult"]["Lyric"])
+    # pprint(response_dict["GetLyricResult"]["Lyric"])
 
     lyrics = response_dict.get("GetLyricResult").get("Lyric")
 
@@ -179,3 +179,9 @@ def chart_lyrics_get_lyric(lyric_id, checksum):
 def fix_name(name):
     """ Strip/replace extra chars before making Genius URL """
     return name.replace(' ', '-')
+
+
+# def fix_line_breaks(lyric):
+#     """ Convert \r\n to html br"""
+#     lyric = lyric.replace('"','')
+#     return lyric.replace('\r\n','<br />')

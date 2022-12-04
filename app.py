@@ -24,7 +24,7 @@ import spotify_helper
 
 
 logging.basicConfig(
-    format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO
+    format='%(asctime)s - %(levelname)s - %(message)s', level=logging.ERROR
 )
 
 # Spotify AuthN API endpoints
@@ -62,6 +62,10 @@ app.secret_key = os.urandom(16)
 # app.config["SESSION_TYPE"] = "filesystem"
 # Session(app)
 
+MIN_TRACKS_TO_PLAY = 15
+ENOUGH_TRACKS = 100
+
+
 @app.after_request
 def after_request(response):
     # to disable browser caching
@@ -81,15 +85,65 @@ def index():
 
     # Otherwise, user IS logged in... GAME ON
 
-    current_track = game_helper.random_track(session["user_id"])
-    # print(current_track)
+    # find a random track with "good" lyrics
 
-    genius_lyrics = game_helper.fetch_lyrics(current_track["track_artist"], current_track["track_name"])
-    chart_lyrics = game_helper.chart_lyrics_search(current_track["track_artist"], current_track["track_name"])
-    # print(lyrics)
+    loops = 0
 
-    # Play the game
-    return render_template('game.html', current_track=current_track, lyrics1=genius_lyrics, lyrics2=chart_lyrics)
+    while True:
+        
+        # keep track of how many tries, abort after 10 tracks
+        loops += 1
+        
+        # set "current track" (a random track) and fetch lyrics
+        current_track = game_helper.random_track(session["user_id"])
+
+        # genius lyrics are preferred
+        genius_lyrics = game_helper.fetch_lyrics(current_track["track_artist"], current_track["track_name"])
+        
+        if genius_lyrics:
+            # print(genius_lyrics)
+            lyric = genius_lyrics
+            lyric_source = "genius_lyric"
+            break
+
+        elif not genius_lyrics:
+            # did not find genius lyrics, try chart lyrics search
+            chart_lyrics = game_helper.chart_lyrics_search(current_track["track_artist"], current_track["track_name"])
+
+            if chart_lyrics:
+                lyric = chart_lyrics
+                lyric_source = "chart_lyric"
+                break
+
+        # no lyrics found, keep looping through random tracks up to 10x
+        else:
+            print(f"No lyrics found on attempt {loops}.  Trying again...")
+            if loops > 10:
+                # TO DO: return page "sorry, something went wrong... Try again?"
+                break
+
+    # current_track has a good lyric, mark it "correct"
+    current_track["correct"] = True
+
+    # setup dict with 1 correct track, plus decoy tracks
+    game_tracks = []
+    game_tracks.append(current_track)
+
+    # get 3 other decoy tracks 
+    # TO DO: number of decoys should be variable based on difficulty level
+    while len(game_tracks) < 4:
+        random = game_helper.random_track(session["user_id"])
+
+        # check it's not duplicate
+        for track in game_tracks:
+            if random["track_name"] == track["track_name"]:
+                # duplicate. quit loop, get another random track
+                break
+
+        game_tracks.append(random)
+
+    # Play the game round
+    return render_template('game.html', current_track=current_track, lyric=lyric, lyric_source=lyric_source, game_tracks=game_tracks)
 
 
 @app.route('/logout')
@@ -180,10 +234,11 @@ def callback():
     # Refresh user tracks in db
     tracks_count = build_songs_db(user_id)
 
-    
+    if tracks_count < MIN_TRACKS_TO_PLAY:
+        # TO DO: redirect to sorry page, not enough tracks to play
+        return redirect(url_for('me'))
+
     # login processing completed, go to game
-    # TO DO: replace /me with GAME at root /
-    # return redirect(url_for('me'))
     return redirect('/')
 
 
@@ -257,41 +312,43 @@ def favicon():
 def build_songs_db(user_id):
     """ Build the user's song list in the database """
 
+    tracks_count = 0
+
     # get user's liked songs
     liked_tracks = spotify_helper.get_liked_songs()
-
-    # get user's playlists
-    playlists = spotify_helper.get_playlists()
-
-    # get tracks from each playlist
-    pl_tracks = []
-    for pl in playlists:
-        # get tracks from each playlist
-        temp_tracks = spotify_helper.get_playlist_tracks(pl["playlist_url"])
-
-        for track in temp_tracks:
-            # add each track to pl_tracks
-            pl_tracks.append(track)
-
-    # remove duplicates from pl_tracks
-    unique_pl_tracks = [dict(t) for t in {tuple(d.items()) for d in pl_tracks}]
-
-    # sort unique_pl_tracks dict by track name
-    unique_pl_tracks = sorted(unique_pl_tracks, key=lambda d: d['track_name'])
 
     # delete this user's tracks from db
     deleted_count = db_helper.delete_tracks(user_id)
 
-    tracks_count = 0
-
-    # insert tracks to database
+    # insert liked tracks to database
     for track in liked_tracks:
         db_helper.create_track(user_id, track["track_name"], track["track_artist"], track["track_album"], track["track_uri"])
         tracks_count += 1
 
-    for track in unique_pl_tracks:
-        db_helper.create_track(user_id, track["track_name"], track["track_artist"], track["track_album"], track["track_uri"])
-        tracks_count += 1
+    if tracks_count < ENOUGH_TRACKS:
+        # not enough tracks yet, get user's playlists
+        playlists = spotify_helper.get_playlists()
+
+        # get tracks from each playlist
+        pl_tracks = []
+        for pl in playlists:
+            # get tracks from each playlist
+            temp_tracks = spotify_helper.get_playlist_tracks(pl["playlist_url"])
+
+            for track in temp_tracks:
+                # add each track to pl_tracks
+                pl_tracks.append(track)
+
+        # remove duplicates from pl_tracks
+        unique_pl_tracks = [dict(t) for t in {tuple(d.items()) for d in pl_tracks}]
+
+        # sort unique_pl_tracks dict by track name
+        unique_pl_tracks = sorted(unique_pl_tracks, key=lambda d: d['track_name'])
+
+        # insert playlist tracks to database
+        for track in unique_pl_tracks:
+            db_helper.create_track(user_id, track["track_name"], track["track_artist"], track["track_album"], track["track_uri"])
+            tracks_count += 1
 
     # return total count of tracks inserted for the user
     return tracks_count
