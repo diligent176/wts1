@@ -6,6 +6,7 @@ colorama
 cs50
 Flask
 Flask-Session
+free-proxy
 idna
 itsdangerous
 Jinja2
