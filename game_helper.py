@@ -205,9 +205,9 @@ def fix_name(name):
 
 def find_proxies():
     
+    proxy = FreeProxy().get()
     # proxy = FreeProxy(https=True).get()
-    # proxy = FreeProxy(https=True).get()
-    proxy = FreeProxy(country_id=['US']).get()
+    # proxy = FreeProxy(country_id=['US']).get()
     # proxy = FreeProxy(country_id=['US', 'BR'], https=True, rand=True, timeout=1).get()
     # proxy = FreeProxy(country_id=['US'], rand=True, timeout=1).get()
 
