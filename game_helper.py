@@ -65,6 +65,13 @@ def fetch_lyrics(track_artist, track_name):
     else:
         page = requests.get(url)
 
+    # if 403 result, reset the proxy to empty, a new one will be fetched next time
+    if page.status_code == 403:
+        PROXIES = {}
+        logging.error(
+            f"*********************************\n\n HTTP error {page.status_code} from Chart Lyrics API [SearchLyric]\n\n*********************************\n")
+        return None
+
 
     html = BeautifulSoup(page.text, 'html.parser')
     lyrics = html.find("div", class_="Lyrics__Container-sc-1ynbvzw-6 YYrds")
@@ -205,6 +212,7 @@ def fix_name(name):
 
 def find_proxies():
     
+    # https://github.com/jundymek/free-proxy
     proxy = FreeProxy().get()
     # proxy = FreeProxy(https=True).get()
     # proxy = FreeProxy(country_id=['US']).get()
