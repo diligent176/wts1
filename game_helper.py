@@ -69,7 +69,7 @@ def fetch_lyrics(track_artist, track_name):
     if page.status_code == 403:
         PROXIES = {}
         logging.error(
-            f"*********************************\n\n HTTP error {page.status_code} from Chart Lyrics API [SearchLyric]\n\n*********************************\n")
+            f"*********************************\n\n HTTP error {page.status_code} from GENIUS \n\n*********************************\n")
         return None
 
 
@@ -218,7 +218,7 @@ def find_proxies():
     # proxy = FreeProxy(country_id=['US']).get()
     # proxy = FreeProxy(country_id=['US', 'BR'], https=True, rand=True, timeout=1).get()
     # proxy = FreeProxy(country_id=['US'], rand=True, timeout=1).get()
-    proxy = FreeProxy(country_id=['US'], rand=True).get()
+    proxy = FreeProxy(country_id=['CA','US'], elite=True).get()
 
     proxies = {
     'http': proxy,
