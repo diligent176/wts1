@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 import urllib.parse
 import xmltodict
 import logging
+import re
+import os
 
 from fp.fp import FreeProxy
 
@@ -18,7 +20,7 @@ CHART_LYRICS_API_SEARCH_URL = "http://api.chartlyrics.com/apiv1.asmx/SearchLyric
 CHART_LYRICS_API_GETLYRIC_URL = "http://api.chartlyrics.com/apiv1.asmx/GetLyric"
 GENIUS_EXAMPLE_URL = "https://genius.com/Incubus-anna-molly-lyrics"         # 'https://genius.com/'+ artistname + '-' + songname + '-' + 'lyrics'
 
-USE_PROXY = True
+USE_PROXY = os.environ.get("USE_PROXY")
 PROXIES = {}
 
 def random_track(user_id):
@@ -56,6 +58,7 @@ def fetch_lyrics(track_artist, track_name):
     global USE_PROXY
     global PROXIES
     if USE_PROXY and len(PROXIES) == 0:
+        print(f"\n\n USE_PROXY is {USE_PROXY} - FINDING A PROXY...\n\n")
         PROXIES = find_proxies()
 
     if USE_PROXY:
@@ -200,25 +203,71 @@ def chart_lyrics_get_lyric(lyric_id, checksum):
         return None
 
 
+def cleanse_lyric(words, track_name):
+    """ Strip any marker words from lyrics websites e.g.:
+    [Intro] [Verse1] [Chorus] [Bridge] [Verse 1: Duddy B] [Chorus:] [Instrumental] 
+    And, obscure words that reveal track_name
+    """
+    # replace EOL chars with spaces
+    cleansed = words.replace("\r\n", " ")
+    cleansed = cleansed.replace("\n", " ")
+    
+    # remove any marker words (between square brackets)
+    cleansed = re.sub(r"\[.*?\]", "", cleansed)
+
+    # hide track name if it appears in the lyric
+    obfuscated_txt = "*" * len(track_name)
+    pattern = re.compile(re.escape(track_name), re.IGNORECASE)
+    cleansed = pattern.sub(obfuscated_txt, cleansed)
+
+    # cleansed = re.sub(r"\[.*?\]", "*" * len(word), cleansed, 0, re.IGNORECASE)
+
+    # track_name_words = re.findall(r"\w+", track_name)
+    
+    # for word in track_name_words:
+    #     # cleansed = cleansed.replace(word, "*" * len(word))
+    #     # regex = re.compile(re.escape(word), re.IGNORECASE)
+    #     # cleansed = regex.sub('giraffe', 'I want a hIPpo for my birthday')
+    #     # re.IGNORECASE
+    #     cleansed = re.sub(r"\[.*?\]", "*" * len(word), cleansed, 0, re.IGNORECASE)
+
+    return cleansed
+
+
 def fix_name(name):
     """ Strip/replace extra chars before making Genius URL """
     return name.replace(' ', '-')
 
 
-# def fix_line_breaks(lyric):
-#     """ Convert \r\n to html br"""
-#     lyric = lyric.replace('"','')
-#     return lyric.replace('\r\n','<br />')
+def get_word_snip(lyric, words_return_count, track_name):
+    """ return a random section of lyrics for game play """
+
+    # CLEANSE: ensure track_name isn't in the returned snip
+    # and strip things like [Verse] etc
+    cleansed_lyric = cleanse_lyric(lyric, track_name)
+    
+    word_snip = ""
+    words = re.findall(r"\w+", cleansed_lyric)
+
+    # choose random point, between 1st and last word
+    # but leave at least "words_return_count" from end
+    random_point = randrange(1, len(words) - words_return_count)
+
+    for i in range(random_point, random_point + words_return_count):
+        word_snip += f" {words[i-1]}"
+
+    return word_snip.strip()
+
 
 def find_proxies():
     
     # https://github.com/jundymek/free-proxy
-    # proxy = FreeProxy().get()
+    proxy = FreeProxy().get()
     # proxy = FreeProxy(https=True).get()
     # proxy = FreeProxy(country_id=['US']).get()
     # proxy = FreeProxy(country_id=['US', 'BR'], https=True, rand=True, timeout=1).get()
     # proxy = FreeProxy(country_id=['US'], rand=True, timeout=1).get()
-    proxy = FreeProxy(country_id=['CA','US'], elite=True).get()
+    # proxy = FreeProxy(country_id=['CA','US','GB']).get()
 
     proxies = {
     'http': proxy,

@@ -122,6 +122,10 @@ def index():
                 # TO DO: return page "sorry, something went wrong... Try again?"
                 break
 
+    # get a lyric snip
+    if lyric:
+        snip = game_helper.get_word_snip(lyric, 15, current_track["track_name"])
+
     # current_track has a good lyric, mark it "correct"
     current_track["correct"] = True
 
@@ -143,7 +147,7 @@ def index():
         game_tracks.append(random)
 
     # Play the game round
-    return render_template('game.html', current_track=current_track, lyric=lyric, lyric_source=lyric_source, game_tracks=game_tracks)
+    return render_template('game.html', current_track=current_track, lyric=lyric, lyric_source=lyric_source, game_tracks=game_tracks, snip=snip)
 
 
 @app.route('/logout')
