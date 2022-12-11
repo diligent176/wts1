@@ -6,53 +6,64 @@ GAME
 
 {% block content %}
 
-<!-- <div class="text-center ml-5 mr-5"> -->
+<script>
+    function showMe() {
+        var x = document.getElementById("full_lyric");
+        x.style.display = "block";
+        // if (x.style.display == "none") {
+        //     x.style.display = "block";
+        // } else {
+        //     x.style.display = "none";
+        // }
+    }
+</script>
+
 
 <div class="container text-center">
 
-    <div class="row outlineblue">
+    <div class="row">
 
-        <div class="text-center outlinered">
-            <h1 class="mt-3 mb-2">PLAY THE GAME</h1>
-            <h5>USER ID: <i>{{ session["user_id"] }}</i></h5>
-            <h3><i>{{ current_track["track_name"] }} by {{ current_track["track_artist"] }}</i></h3>
+        <div class="text-center">
+            <h1 class="m-5">What's That Song?</h1>
         </div>
 
-        <div class="text-center largetext outlinered">
-            <h5 class="mt-5 mb-3">snip:</h5>
-            {{ snip }}
-
+        <div class="text-center largetext m-4">
+            <span class="lyric m-4 p-4"> " {{ snip }} " </span>
         </div>
+    </div>
 
-        <div class="text-center largetext outlinered">
-            <h5 class="mt-5 mb-3">track dict:</h5>
-            <ul class="nonum">
-            {% for t in game_tracks %}
+    <div class="row text-center largetext m-4">
+        <!-- <div class="text-center largetext mt-4 mb-2"> -->
+        <h4 class="m-3">Was it...</h4>
+        <!-- <ul class="nonum">
+                {% for t in game_tracks %}
                 <li>{{ t.track_name }} &nbsp; // by {{ t.track_artist }} &nbsp; (Album: {{ t.track_album }})</li>
-            {% endfor %}
-            </ul>
+                {% endfor %}
+            </ul> -->
+        <!-- </div> -->
 
+        {% for t in game_tracks %}
+        <div class="col-3">
+            <button type="button" class="btn btn-primary largetext w-100" onclick="showMe()">{{ t.track_name }}</button>
+            <!-- {{ t.track_name }} &nbsp; -->
+            <!-- // by {{ t.track_artist }} &nbsp; -->
+            <br />By: {{ t.track_artist }}
+            <br />Album: {{ t.track_album }}
         </div>
-
-        <div class="text-center largetext outlinegreen">
-            <h4 class="mt-5 mb-3">LYRICS from {{lyric_source}}:</h4>
-            {% autoescape false %} {{ lyric | replace('\r\n', '<br>') | replace('\n', '<br>') }} {% endautoescape %}
-        </div>
-
-        <!-- <div class="text-center largetext col-6 outlinegreen">
-            <h4 class="mt-5 mb-3">LYRICS 2:</h4>
-            {% autoescape false %} {{ lyrics2 | replace('\n', '<br>') }} {% endautoescape %}
-        </div> -->
+        {% endfor %}
 
     </div>
 
-<!-- 
-    <p class="largetext mt-3 mb-1">
-        {{ lyrics2 }}
-    </p> -->
+    <div class="row">
+        <div class="text-center largetext hidefirst" id="full_lyric">
+            <a href="/" class="btn btn-secondary btn-sm" role="button">Play Again &gt;</a>
+            <h3 class="mt-3 mb-1"><i>{{ current_track["track_name"] }}</i></h3>
+            <h4 class="mt-3 mb-1"><i>by {{ current_track["track_artist"] }}</i></h4>
+            {% autoescape false %} {{ lyric | replace('\r\n', '<br>') | replace('\n', '<br>') }} {% endautoescape %}
+            <h5 class="mt-4 mb-1"><i>(Lyrics from {{lyric_source}})</i></h5>
+        </div>
+    </div>
 
 </div>
-
-<!-- </div> -->
 
 {% endblock %}

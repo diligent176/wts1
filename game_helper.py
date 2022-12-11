@@ -18,10 +18,13 @@ from pprint import pprint
 
 CHART_LYRICS_API_SEARCH_URL = "http://api.chartlyrics.com/apiv1.asmx/SearchLyric"
 CHART_LYRICS_API_GETLYRIC_URL = "http://api.chartlyrics.com/apiv1.asmx/GetLyric"
-GENIUS_EXAMPLE_URL = "https://genius.com/Incubus-anna-molly-lyrics"         # 'https://genius.com/'+ artistname + '-' + songname + '-' + 'lyrics'
+# 'https://genius.com/'+ artistname + '-' + songname + '-' + 'lyrics'
+GENIUS_EXAMPLE_URL = "https://genius.com/Incubus-anna-molly-lyrics"
 
-USE_PROXY = os.environ.get("USE_PROXY")
+# USE_PROXY = os.environ.get("USE_PROXY")   # this returns a string, not a bool
+USE_PROXY = os.getenv("USE_PROXY", 'False').lower() in ('true', '1')
 PROXIES = {}
+
 
 def random_track(user_id):
     """ Pick a random track from user's library 
@@ -53,7 +56,7 @@ def fetch_lyrics(track_artist, track_name):
     # url = 'https://genius.com/'+ artistname + '-' + songname + '-' + 'lyrics'
     url = f"https://genius.com/{artistname}-{songname}-lyrics".replace(
         '...', '-').replace('-/-', '-')
-    
+
     # if use proxy server true, make sure one is selected
     global USE_PROXY
     global PROXIES
@@ -74,7 +77,6 @@ def fetch_lyrics(track_artist, track_name):
         logging.error(
             f"*********************************\n\n HTTP error {page.status_code} from GENIUS \n\n*********************************\n")
         return None
-
 
     html = BeautifulSoup(page.text, 'html.parser')
     lyrics = html.find("div", class_="Lyrics__Container-sc-1ynbvzw-6 YYrds")
@@ -211,25 +213,29 @@ def cleanse_lyric(words, track_name):
     # replace EOL chars with spaces
     cleansed = words.replace("\r\n", " ")
     cleansed = cleansed.replace("\n", " ")
-    
+
     # remove any marker words (between square brackets)
     cleansed = re.sub(r"\[.*?\]", "", cleansed)
 
-    # hide track name if it appears in the lyric
+    # mask the track_name, if it appears in it's entirety
     obfuscated_txt = "*" * len(track_name)
     pattern = re.compile(re.escape(track_name), re.IGNORECASE)
     cleansed = pattern.sub(obfuscated_txt, cleansed)
 
-    # cleansed = re.sub(r"\[.*?\]", "*" * len(word), cleansed, 0, re.IGNORECASE)
-
+    # iterate over each word in track name to obfuscate that word in lyric snip
     # track_name_words = re.findall(r"\w+", track_name)
-    
-    # for word in track_name_words:
-    #     # cleansed = cleansed.replace(word, "*" * len(word))
-    #     # regex = re.compile(re.escape(word), re.IGNORECASE)
-    #     # cleansed = regex.sub('giraffe', 'I want a hIPpo for my birthday')
-    #     # re.IGNORECASE
-    #     cleansed = re.sub(r"\[.*?\]", "*" * len(word), cleansed, 0, re.IGNORECASE)
+    track_name_words = re.findall(r"[A-Za-z']+", track_name)
+
+    for word in track_name_words:
+        if len(word) >= 3 and word.lower() not in ["the", "and"]:
+            obfuscated_word = "*" * len(word)
+
+            # pattern = re.compile(re.escape(word), re.IGNORECASE)
+            # cleansed = pattern.sub(obfuscated_word, cleansed)
+
+            # pattern = re.compile(re.escape(r"\b{}\b".format(word)), re.IGNORECASE)
+            cleansed = re.sub(r"\b{}\b".format(re.escape(word)),
+                              obfuscated_word, cleansed, 0, re.IGNORECASE)
 
     return cleansed
 
@@ -245,14 +251,17 @@ def get_word_snip(lyric, words_return_count, track_name):
     # CLEANSE: ensure track_name isn't in the returned snip
     # and strip things like [Verse] etc
     cleansed_lyric = cleanse_lyric(lyric, track_name)
-    
-    word_snip = ""
-    words = re.findall(r"\w+", cleansed_lyric)
+
+    # create a list of song words
+    # words = re.findall(r"(\w+|\*+)", cleansed_lyric)
+    words_regex = r"((?:[A-Za-z'\"]+)+|\*+)"
+    words = re.findall(words_regex, cleansed_lyric)
 
     # choose random point, between 1st and last word
-    # but leave at least "words_return_count" from end
+    # minus at least "words_return_count" from end
     random_point = randrange(1, len(words) - words_return_count)
 
+    word_snip = ""
     for i in range(random_point, random_point + words_return_count):
         word_snip += f" {words[i-1]}"
 
@@ -260,7 +269,7 @@ def get_word_snip(lyric, words_return_count, track_name):
 
 
 def find_proxies():
-    
+
     # https://github.com/jundymek/free-proxy
     proxy = FreeProxy().get()
     # proxy = FreeProxy(https=True).get()
@@ -270,8 +279,8 @@ def find_proxies():
     # proxy = FreeProxy(country_id=['CA','US','GB']).get()
 
     proxies = {
-    'http': proxy,
-    'https': proxy,
+        'http': proxy,
+        'https': proxy,
     }
 
     print("########## PROXY SELECTED ##########")

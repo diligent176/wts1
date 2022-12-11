@@ -11,6 +11,21 @@ ul.nonum {
     list-style: none;
 }
 
+.hidefirst {
+    display: none;
+}
+
+.lyric {
+    font-style: italic;
+    font-weight: 600;
+    padding: .6em;
+    margin: .4em;
+    background-color: #eee;
+    border: 2px solid #bbb;
+    /* border-color: #000000; */
+    border: 0px solid black;
+}
+
 .spotgreen {
     color: #000000;
     background-color: #1ED760;

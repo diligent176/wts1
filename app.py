@@ -124,7 +124,8 @@ def index():
 
     # get a lyric snip
     if lyric:
-        snip = game_helper.get_word_snip(lyric, 15, current_track["track_name"])
+        # TO DO: use difficulty setting for number of words
+        snip = game_helper.get_word_snip(lyric, 20, current_track["track_name"])
 
     # current_track has a good lyric, mark it "correct"
     current_track["correct"] = True
