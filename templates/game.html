@@ -13,6 +13,7 @@ GAME
         var correct_btn = document.getElementById("correct_btn");
         btn.style.backgroundColor = "darkred";
         correct_btn.style.backgroundColor = "green";
+
     }
 </script>
 
@@ -20,35 +21,26 @@ GAME
 
     <div class="row">
         <div class="text-center">
-            <h1 class="mt-5 mb-2">What's That Song?</h1>
+            <h1 class="mt-5 mb-4">What's That Song?</h1>
+            With the lyric:<br />
         </div>
 
         <div class="text-center largetext m-1 p-4 lyric">
-            <!-- <span class="lyric m-4 p-4"> " {{ snip }} " </span> -->
-            " {{ snip }} "
+            " <span id="snip_span">{{ snip }}</span> "
         </div>
     </div>
 
     <div class="row text-center largetext m-3">
-        <!-- <div class="text-center largetext mt-4 mb-2"> -->
-        <h4 class="mb-3">Was it...</h4>
-        <!-- <ul class="nonum">
-                {% for t in game_tracks %}
-                <li>{{ t.track_name }} &nbsp; // by {{ t.track_artist }} &nbsp; (Album: {{ t.track_album }})</li>
-                {% endfor %}
-            </ul> -->
-        <!-- </div> -->
+        <h4 class="mb-3">Guess the song</h4>
 
         {% for t in game_tracks %}
-        <div class="col-3">
+        <div class="col-3 smalltext">
             <button type="button" 
                     class="btn btn-primary largetext w-100" 
                     {% if t["correct"] == True %} id="correct_btn" {% endif %}
                     onclick="showMe(this)">
                     {{ t.track_name }}
             </button>
-            <!-- {{ t.track_name }} &nbsp; -->
-            <!-- // by {{ t.track_artist }} &nbsp; -->
             <br />By: {{ t.track_artist }}
             <br />Album: {{ t.track_album }}
         </div>
@@ -65,7 +57,9 @@ GAME
 
         <div class="text-center largetext">
             <h4 class="mt-2 mb-1"><i>{{ current_track["track_name"] }} by {{ current_track["track_artist"] }}</i></h4>
+            <div id="sub_lyric">
             {% autoescape false %} {{ lyric | replace('\r\n', '<br>') | replace('\n', '<br>') }} {% endautoescape %}
+            </div>
             <h5 class="mt-4 mb-1"><i>(Lyrics from {{lyric_source}})</i></h5>
         </div>
     </div>

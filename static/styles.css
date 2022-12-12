@@ -3,8 +3,8 @@
     font-size: larger;
 }
 
-.xsmalltext {
-    font-size: x-small;
+.smalltext {
+    font-size: .9em;
 }
 
 ul.nonum {
@@ -18,6 +18,10 @@ ul.nonum {
 .player {
     background-color: darkred;
     border: 0px;
+}
+
+mark {
+    background-color: lightyellow;
 }
 
 .lyric {
