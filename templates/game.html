@@ -7,9 +7,12 @@ GAME
 {% block content %}
 
 <script>
-    function showMe() {
-        var x = document.getElementById("full_lyric");
-        x.style.display = "block";
+    function showMe(btn) {
+        var lyricdiv = document.getElementById("full_lyric");
+        lyricdiv.style.display = "block";
+        var correct_btn = document.getElementById("correct_btn");
+        btn.style.backgroundColor = "darkred";
+        correct_btn.style.backgroundColor = "green";
     }
 </script>
 
@@ -38,7 +41,12 @@ GAME
 
         {% for t in game_tracks %}
         <div class="col-3">
-            <button type="button" class="btn btn-primary largetext w-100" onclick="showMe()">{{ t.track_name }}</button>
+            <button type="button" 
+                    class="btn btn-primary largetext w-100" 
+                    {% if t["correct"] == True %} id="correct_btn" {% endif %}
+                    onclick="showMe(this)">
+                    {{ t.track_name }}
+            </button>
             <!-- {{ t.track_name }} &nbsp; -->
             <!-- // by {{ t.track_artist }} &nbsp; -->
             <br />By: {{ t.track_artist }}
