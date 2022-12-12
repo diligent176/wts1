@@ -42,12 +42,11 @@
                     <li class="nav-item"><a class="nav-link" href="/me">My User Profile</a></li>
                 </ul>
                 <ul class="navbar-nav ms-auto mt-2">
-                    <li class="nav-item"><a class="nav-link" href="/me">Last Visit: {{ session["last_visit"] }}</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/logout">Log Out (UID: {{ session["user_id"] }})</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/me">[UserId:{{ session["user_id"] }}] &nbsp; &nbsp; Last Visit: {{ session["last_visit"] }}&nbsp; &nbsp;</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                 </ul>
                 {% else %}
                 <ul class="navbar-nav ms-auto mt-2">
-                    <li class="nav-item"><a class="nav-link" href="/register">Last Visited: {{ session["last_visit"] }}</a></li>
                     <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
                 </ul>
                 {% endif %}

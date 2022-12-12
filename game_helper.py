@@ -73,7 +73,7 @@ def fetch_lyrics(track_artist, track_name):
 
     # if 403 result, reset the proxy to empty, a new one will be fetched next time
     if page.status_code == 403:
-        PROXIES = {}
+        # PROXIES = {}
         logging.error(
             f"*********************************\n\n HTTP error {page.status_code} from GENIUS \n\n*********************************\n")
         return None

@@ -10,6 +10,7 @@ import requests
 ME_URL = "https://api.spotify.com/v1/me"
 LIKED_URL = "https://api.spotify.com/v1/me/tracks"
 PLAYLISTS_URL = "https://api.spotify.com/v1/me/playlists"
+TRACK_DETAIL_URL = "https://api.spotify.com/v1/tracks"
 # PLAYLISTITEMS_URL = "https://api.spotify.com/v1/playlists/{playlist_id}/tracks"
 # e.g. get tracks at https://api.spotify.com/v1/playlists/27hR4eUcVxpfZzZT7hKd4A/tracks
 
@@ -144,6 +145,24 @@ def get_playlist_tracks(playlist_url):
     sorted_tracks = sorted(playlist_tracks, key=lambda d: d['track_name'])
 
     return sorted_tracks
+
+
+def get_track(track_uri):
+    """ Fetch spotify track details """
+    auth_header = get_auth_header()
+
+    track_id = track_uri.split(":")[-1]
+
+    response = requests.get(f"{TRACK_DETAIL_URL}/{track_id}", headers=auth_header)
+    response_data = response.json()
+
+    if response.status_code != 200:
+        logging.error(
+            f"get_track() failed - HTTP {response.status_code} {response_data.get('error', 'No error message was returned.')}")
+        # TO DO: handle 403 and other errors gracefully
+        abort(response.status_code)
+
+    return response_data
 
 
 def get_auth_header():

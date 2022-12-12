@@ -129,6 +129,7 @@ def index():
 
     # current_track has a good lyric, mark it "correct"
     current_track["correct"] = True
+    cur_track_detail = spotify_helper.get_track(current_track["track_uri"])
 
     # setup dict with 1 correct track, plus decoy tracks
     game_tracks = []
@@ -148,7 +149,7 @@ def index():
         game_tracks.append(random)
 
     # Play the game round
-    return render_template('game.html', current_track=current_track, lyric=lyric, lyric_source=lyric_source, game_tracks=game_tracks, snip=snip)
+    return render_template('game.html', current_track=current_track, lyric=lyric, lyric_source=lyric_source, game_tracks=game_tracks, snip=snip, detail=cur_track_detail)
 
 
 @app.route('/logout')
