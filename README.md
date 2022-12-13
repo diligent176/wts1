@@ -24,11 +24,10 @@ This game tests a player's lyric knowledge, with songs in their own Spotify libr
 
 ### Technical achievements so far
 
-- Authenticated players via Spotify Authorization Code flow
+- Authenticated players via Spotify [Authorization Code flow](https://developer.spotify.com/documentation/general/guides/authorization/code-flow/)
 - Called several Spotify APIs to retrieve player details and song data
-- Created SQLite database to hold player details, high scores, and transient track data
-  (reducing the number of repeated calls to Spotify)
-- Retrieved lyrics from [genius.com](https://genius.com/) and [Chartlyrics API](http://www.chartlyrics.com/api.aspx)
+- A SQLite database holds player details, high scores, and transient track data (reduces repeated calls to Spotify)
+- Song lyrics retrieved from [genius.com](https://genius.com/) and [Chartlyrics API](http://www.chartlyrics.com/api.aspx)
 - Implemented helper libraries for spotify, database, and game play functions - such as selecting random songs and choosing random lyric snippets.
 
 &nbsp;
