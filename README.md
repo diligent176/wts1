@@ -29,6 +29,7 @@ This game tests a player's lyric knowledge, with songs in their own Spotify libr
 - Song lyrics retrieved from [genius.com](https://genius.com/) and [Chartlyrics API](http://www.chartlyrics.com/api.aspx)
 - Implemented helper libraries for spotify, database, and game play functions - such as selecting random songs and choosing random lyric snippets.
 - Used some basic Bootstrap styling
+- Implemented Github CI-CD workflows (see [main_wts1.yml](.github/workflows/main_wts1.yml)), deploying to Azure App Service on each git push
 
 
 ### Future improvements
