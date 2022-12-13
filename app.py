@@ -175,7 +175,7 @@ def login():
 
     # Request user to authorize these scopes
     scope = 'user-read-private user-read-email user-library-read'
-    # scope = 'user-read-private user-read-email'     # TO DO: test errors cases with insufficient scopes
+    # scope = 'user-read-private user-read-email'     # TO DO: test errors cases with insufficient scopes or too much i.e. playlist-modify-public
 
     payload = {
         'client_id': CLIENT_ID,
