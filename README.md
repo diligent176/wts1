@@ -52,6 +52,21 @@ The program is a flask web application, written in Python with a touch of JavaSc
 | **spotify_helper.py** | spotify API helpers |
 
 
+## Execution
+
+To run the game locally:
+
+- Create a `.env` file with the content shown below
+- Run `flask run` in the root directory
+
+```bash
+WTS_CLIENT_ID = REDACTED_CLIENT_ID
+WTS_CLIENT_SECRET = REDACTED_CLIENT_SECRET
+WTS_REDIRECT_URI = http://127.0.0.1:5000/callback
+USE_PROXY = False
+FLASK_APP = app.py
+```
+
 
 ### Program Flow
 
